@@ -8,7 +8,7 @@ The **Golang Handbook** serves as a structured resource for developers to learn 
 * **Aron Davlyudov**
 * **Aslan Aldashev**
 
-##Key Features
+## Key Features
 * **Idiomatic Code:** Examples that follow official Go conventions.
 * **Concurrency Deep-Dive:** Comprehensive guides on Goroutines, Channels, and Context.
 * **Standard Library Focus:** Practical usage of `net/http`, `encoding/json`, and more.
