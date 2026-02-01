@@ -50,34 +50,5 @@
       </form>
     </div>
   </main>
-
-  <script>
-    const form = document.getElementById("registerForm");
-    const statusEl = document.getElementById("status");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      statusEl.textContent = "Registering...";
-
-      const data = Object.fromEntries(new FormData(form).entries());
-
-      try {
-        const res = await fetch("/api/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        if (!res.ok) {
-          const msg = await res.text();
-          throw new Error(msg || `HTTP ${res.status}`);
-        }
-
-        statusEl.textContent = "Registration successful. You can now log in.";
-      } catch (err) {
-        statusEl.textContent = "Registration failed: " + (err?.message || err);
-      }
-    });
-  </script>
 </body>
 </html>

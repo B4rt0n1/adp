@@ -89,30 +89,5 @@
         <p>Saken Akhmediyar, Aron Davlyudov, Aslan Aldashev</p>
     </footer>
 
-    <script>
-        const loginBtn = document.getElementById("tab-login-btn");
-        const registerBtn = document.getElementById("tab-register-btn");
-        const loginPanel = document.getElementById("tab-login");
-        const registerPanel = document.getElementById("tab-register");
-
-        function setTab(which) {
-            const isLogin = which === "login";
-
-            loginBtn.classList.toggle("active", isLogin);
-            registerBtn.classList.toggle("active", !isLogin);
-
-            loginBtn.setAttribute("aria-selected", String(isLogin));
-            registerBtn.setAttribute("aria-selected", String(!isLogin));
-
-            loginPanel.classList.toggle("active", isLogin);
-            registerPanel.classList.toggle("active", !isLogin);
-        }
-
-        loginBtn.addEventListener("click", () => setTab("login"));
-        registerBtn.addEventListener("click", () => setTab("register"));
-
-        document.getElementById("login-form").addEventListener("submit", (e) => e.preventDefault());
-        document.getElementById("register-form").addEventListener("submit", (e) => e.preventDefault());
-    </script>
 </body>
 </html>
