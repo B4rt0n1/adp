@@ -50,5 +50,36 @@
       </form>
     </div>
   </main>
+
+<script>
+  const form = document.getElementById("registerForm");
+  const statusEl = document.getElementById("status");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    statusEl.textContent = "";
+
+    const payload = {
+      name: form.elements.name.value.trim(),
+      email: form.elements.email.value.trim(),
+      password: form.elements.password.value
+    };
+
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await res.text();
+      statusEl.textContent = res.ok ? text : `Error (${res.status}): ${text}`;
+      if (res.ok) form.reset();
+    } catch (err) {
+      statusEl.textContent = "Network error: " + (err?.message || err);
+    }
+  });
+</script>
+
 </body>
 </html>
