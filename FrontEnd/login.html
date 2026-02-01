@@ -38,12 +38,42 @@
         <button class="btn primary" type="submit">Login</button>
 
         <p class="muted">
-          No account yet? <a href="register.html">Create one</a>
+          No account yet? <a href="registration.html">Create one</a>
         </p>
 
         <p id="status" class="status" aria-live="polite"></p>
       </form>
     </div>
   </main>
+
+<script>
+  const form = document.getElementById("loginForm");
+  const statusEl = document.getElementById("status");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    statusEl.textContent = "";
+
+    const payload = {
+      email: form.elements.email.value.trim(),
+      password: form.elements.password.value
+    };
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await res.text();
+      statusEl.textContent = res.ok ? text : `Error (${res.status}): ${text}`;
+      if (res.ok) form.reset();
+    } catch (err) {
+      statusEl.textContent = "Network error: " + (err?.message || err);
+    }
+  });
+</script>
+
 </body>
 </html>
