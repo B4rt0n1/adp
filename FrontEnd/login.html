@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+        <div class="container">
+            <a href="index.html" class="logo">GoEdu</a>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="#">Handbooks</a>
+                <a href="#">Go</a>
+                <a href="#">About</a>
+                <a href="registration.html">Register</a>
+            </nav>
+        </div>
+    </header>
+
+  <main class="container">
+    <div class="card auth-card">
+      <h1>Login</h1>
+
+      <form id="loginForm" class="form">
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" autocomplete="email" required />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="current-password" required />
+        </label>
+
+        <button class="btn primary" type="submit">Login</button>
+
+        <p class="muted">
+          No account yet? <a href="register.html">Create one</a>
+        </p>
+
+        <p id="status" class="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </main>
+</body>
+</html>
