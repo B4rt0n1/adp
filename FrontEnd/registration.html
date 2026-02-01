@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+        <div class="container">
+            <a href="index.html" class="logo">GoEdu</a>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="#">Handbooks</a>
+                <a href="#">Go</a>
+                <a href="#">About</a>
+                <a href="#">Register</a>
+            </nav>
+        </div>
+    </header>
+
+  <main class="container">
+    <div class="card auth-card">
+      <h1>Create account</h1>
+
+      <form id="registerForm" class="form">
+        <label class="field">
+          <span>Name</span>
+          <input name="name" type="text" autocomplete="name" required />
+        </label>
+
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" autocomplete="email" required />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="new-password" minlength="8" required />
+        </label>
+
+        <button class="btn primary" type="submit">Register</button>
+
+        <p class="muted">
+          Already have an account? <a href="login.html">Log in</a>.
+        </p>
+
+        <p id="status" class="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const statusEl = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      statusEl.textContent = "Registering...";
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error(msg || `HTTP ${res.status}`);
+        }
+
+        statusEl.textContent = "Registration successful. You can now log in.";
+      } catch (err) {
+        statusEl.textContent = "Registration failed: " + (err?.message || err);
+      }
+    });
+  </script>
+</body>
+</html>

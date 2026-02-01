@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+        <div class="container">
+            <a href="index.html" class="logo">GoEdu</a>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="#">Handbooks</a>
+                <a href="#">Go</a>
+                <a href="#">About</a>
+                <a href="registration.html">Register</a>
+            </nav>
+        </div>
+    </header>
+
+  <main class="container">
+    <div class="card auth-card">
+      <h1>Login</h1>
+
+      <form id="loginForm" class="form">
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" autocomplete="email" required />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="current-password" required />
+        </label>
+
+        <button class="btn primary" type="submit">Login</button>
+
+        <p class="muted">
+          No account yet? <a href="register.html">Create one</a>
+        </p>
+
+        <p id="status" class="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const statusEl = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      statusEl.textContent = "Logging in...";
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error(msg || `HTTP ${res.status}`);
+        }
+
+        statusEl.textContent = "Login successful.";
+      } catch (err) {
+        statusEl.textContent = "Login failed: " + (err?.message || err);
+      }
+    });
+  </script>
+</body>
+</html>

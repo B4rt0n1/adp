@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Go Handbook – Fun Project</title>
+    <title>Go Handbook</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <header class="site-header">
         <div class="container">
-            <h1 class="logo">GoEdu</h1>
+            <a href="#" class="logo">GoEdu</a>
             <nav class="main-nav">
                 <a href="#">Home</a>
                 <a href="#">Handbooks</a>
                 <a href="#">Go</a>
                 <a href="#">About</a>
+                <a href="registration.html">Register</a>
             </nav>
         </div>
     </header>
@@ -32,6 +33,8 @@
         </aside>
 
         <main class="main-content">
+            
+
             <section id="intro">
                 <h2>Introduction</h2>
                 <p>
@@ -83,7 +86,33 @@
     </div>
 
     <footer class="site-footer">
-        <p>© 2025 Go Handbook – Fun Project</p>
+        <p>Saken Akhmediyar, Aron Davlyudov, Aslan Aldashev</p>
     </footer>
+
+    <script>
+        const loginBtn = document.getElementById("tab-login-btn");
+        const registerBtn = document.getElementById("tab-register-btn");
+        const loginPanel = document.getElementById("tab-login");
+        const registerPanel = document.getElementById("tab-register");
+
+        function setTab(which) {
+            const isLogin = which === "login";
+
+            loginBtn.classList.toggle("active", isLogin);
+            registerBtn.classList.toggle("active", !isLogin);
+
+            loginBtn.setAttribute("aria-selected", String(isLogin));
+            registerBtn.setAttribute("aria-selected", String(!isLogin));
+
+            loginPanel.classList.toggle("active", isLogin);
+            registerPanel.classList.toggle("active", !isLogin);
+        }
+
+        loginBtn.addEventListener("click", () => setTab("login"));
+        registerBtn.addEventListener("click", () => setTab("register"));
+
+        document.getElementById("login-form").addEventListener("submit", (e) => e.preventDefault());
+        document.getElementById("register-form").addEventListener("submit", (e) => e.preventDefault());
+    </script>
 </body>
 </html>
