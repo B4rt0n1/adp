@@ -14,11 +14,11 @@ The **Golang Handbook** serves as a structured resource for developers to learn 
 * **Standard Library Focus:** Practical usage of `net/http`, `encoding/json`, and more.
 * **Tooling Guide:** Navigating the Go ecosystem, from modules to benchmarking.
 
+<img width="7640" height="2180" alt="Image" src="https://github.com/user-attachments/assets/f246ef9c-65aa-4422-99af-ad0861a89440" />
 
-<img width="1453" height="265" alt="Image" src="https://github.com/user-attachments/assets/25a88709-38a1-427c-bd81-96d5866ee099" />
+<img width="853" height="637" alt="Image" src="https://github.com/user-attachments/assets/efd01c42-d4f0-4b71-aa75-3cfa67ec3180" />
 
-<img width="997" height="286" alt="Image" src="https://github.com/user-attachments/assets/e282c87e-1977-42ee-88c1-c110e9de6c93" />
+<img width="7283" height="6853" alt="Image" src="https://github.com/user-attachments/assets/fe824645-318c-407d-84ea-8ce13064dba9" />
 
-<img width="1048" height="317" alt="Image" src="https://github.com/user-attachments/assets/fe9e6f03-dfbd-4c42-8153-f307acf20c38" />
+<img width="8191" height="1943" alt="Image" src="https://github.com/user-attachments/assets/cd9def4d-cb69-4eb7-bc7b-b903f79bd385" />
 
-<img width="696" height="533" alt="Image" src="https://github.com/user-attachments/assets/7c5f29c5-9431-44a0-bf25-ad2266a57e90" />
