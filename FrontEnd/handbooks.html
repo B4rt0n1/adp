@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go Handbook</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">GoEdu</a>
+    <nav class="main-nav" id="mainNav">
+      <a href="/">Home</a>
+      <a href="/handbooks">Handbooks</a>
+      <a id="authInvise"></a>
+      <a href="/about">About</a>
+      <a href="/registration" id="authSlot">Register</a>
+    </nav>
+  </div>
+</header>
+
+
+<main class="content-wrapper">
+    <aside class="sidebar">
+        <ul class="toc">
+            <li><a href="#intro">Introduction</a></li>
+            <li><a href="#handbooks">Handbooks</a></li>
+        </ul>
+    </aside>
+
+    <div class="main-content">
+        <section id="intro">
+            <h2>Go Programming Language Handbook</h2>
+            <p>
+                Welcome to the Go Programming Language Handbook.
+                This guide provides structured and practical information
+                about Go, including its syntax, features, and best practices.
+            </p>
+        </section>
+
+        <section id="handbooks">
+            <h2>Available Handbooks</h2>
+
+            <div class="handbook-card">
+                <div>
+                    <strong>Let’s Go — Alex Edwards</strong>
+                    <p class="muted">
+                        A hands-on introduction to Go for building modern web applications.
+                    </p>
+                </div>
+
+                <a
+                    class="primary-btn"
+                    href="HandBooks/Lets_Go_Alex_Edwards_first_Edition.pdf"
+                    target="_blank"
+                >
+                    Open PDF
+                </a>
+            </div>
+
+        </section>
+    </div>
+</main>
+
+    <footer class="site-footer">
+        <p>Saken Akhmediyar, Aron Davlyudov, Aslan Aldashev</p>
+    </footer>
+
+<script>
+async function updateNavbar() {
+  const authSlot = document.getElementById("authSlot");
+  if (!authSlot) return;
+
+  let res;
+  try {
+    res = await fetch("/api/me", { credentials: "same-origin" });
+  } catch (e) {
+    console.error("Auth check failed", e);
+    return;
+  }
+
+  if (res.ok) {
+    const user = await res.json();
+
+    authSlot.outerHTML = `
+      <a href="#" id="logoutLink">Logout</a>
+    `;
+
+    authInvise.outerHTML = `<a href="/go">Go</a>`;
+
+    document.getElementById("logoutLink")
+      .addEventListener("click", async (e) => {
+        e.preventDefault();
+        await fetch("/api/logout", {
+          method: "POST",
+          credentials: "same-origin"
+        });
+        window.location.href = "/login";
+      });
+
+  } else {
+    authSlot.outerHTML = `
+      <a href="/registration">Register</a>
+    `;
+    authInvise.outerHTML = ``;
+  }
+}
+
+updateNavbar();
+</script>
+
+
+</body>
+</html>

@@ -204,6 +204,50 @@ body {
     }
 }
 
+/* Handbook page */
+
+.handbook-card {
+    background: #ffffff;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.handbook-card p {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.handbook-card .primary-btn {
+    white-space: nowrap;
+}
+
+/* Make sidebar feel consistent */
+.sidebar {
+    border-right: 1px solid #e6e6e6;
+    padding-right: 24px;
+}
+
+/* Improve mobile look */
+@media (max-width: 900px) {
+    .sidebar {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid #e6e6e6;
+        padding-bottom: 16px;
+    }
+
+    .handbook-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
 
 /* Registration page */
 .auth-card{max-width:520px;margin:40px auto;}
