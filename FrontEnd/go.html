@@ -49,18 +49,18 @@
     </style>
 </head>
 <body>
-    <header class="site-header">
-        <div class="container">
-            <a href="/" class="logo">GoEdu</a>
-            <nav class="main-nav">
-                <a href="/index">Home</a>
-                <a href="/handbooks">Handbooks</a>
-                <a href="/go">Go</a>
-                <a href="/about">About</a>
-                <a href="/registration">Register</a>
-            </nav>
-        </div>
-    </header>
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">GoEdu</a>
+    <nav class="main-nav" id="mainNav">
+      <a href="/">Home</a>
+      <a href="/handbooks">Handbooks</a>
+      <a id="authInvise"></a>
+      <a href="/about">About</a>
+      <a href="/registration" id="authSlot">Register</a>
+    </nav>
+  </div>
+</header>
 
     <div class="content-wrapper">
         <aside class="sidebar">
@@ -120,5 +120,48 @@
     <footer class="site-footer">
         <p>Saken Akhmediyar, Aron Davlyudov, Aslan Aldashev</p>
     </footer>
+
+<script>
+async function updateNavbar() {
+  const authSlot = document.getElementById("authSlot");
+  if (!authSlot) return;
+
+  let res;
+  try {
+    res = await fetch("/api/me", { credentials: "same-origin" });
+  } catch (e) {
+    console.error("Auth check failed", e);
+    return;
+  }
+
+  if (res.ok) {
+    const user = await res.json();
+
+    authSlot.outerHTML = `
+      <a href="#" id="logoutLink">Logout</a>
+    `;
+
+    authInvise.outerHTML = `<a href="/go">Go</a>`;
+
+    document.getElementById("logoutLink")
+      .addEventListener("click", async (e) => {
+        e.preventDefault();
+        await fetch("/api/logout", {
+          method: "POST",
+          credentials: "same-origin"
+        });
+        window.location.href = "/login";
+      });
+
+  } else {
+    authSlot.outerHTML = `
+      <a href="/registration">Register</a>
+    `;
+    authInvise.outerHTML = ``;
+  }
+}
+
+updateNavbar();
+</script>
 </body>
 </html>

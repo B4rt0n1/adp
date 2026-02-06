@@ -102,6 +102,7 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.06);
     padding: 16px;
     max-width: 520px;
+    min-width: 320px;
 }
 
 .tabs {
