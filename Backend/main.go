@@ -136,10 +136,11 @@ func main() {
 	})
 
 	r.Get("/", s.serveFile("index.html"))
-	r.Get("/index.html", s.serveFile("index.html"))
-	r.Get("/login.html", s.serveFile("login.html"))
-	r.Get("/registration.html", s.serveFile("registration.html"))
-	r.Get("/style.css", s.serveFile("style.css"))
+	r.Get("/login", s.serveFile("login.html"))
+	r.Get("/handbooks", s.serveFile("handbooks.html"))
+	r.Get("/registration", s.serveFile("registration.html"))
+	r.Get("/go", s.serveFile("go.html"))
+	r.Get("/about", s.serveFile("about.html"))
 	r.Get("/*", s.serveAnyStatic())
 
 	addr := ":" + port
