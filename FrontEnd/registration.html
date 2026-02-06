@@ -7,18 +7,17 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="site-header">
-        <div class="container">
-            <a href="index.html" class="logo">GoEdu</a>
-            <nav class="main-nav">
-                <a href="index.html">Home</a>
-                <a href="#">Handbooks</a>
-                <a href="#">Go</a>
-                <a href="#">About</a>
-                <a href="#">Register</a>
-            </nav>
-        </div>
-    </header>
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">GoEdu</a>
+    <nav class="main-nav" id="mainNav">
+      <a href="/">Home</a>
+      <a href="/handbooks">Handbooks</a>
+      <a href="/about">About</a>
+    </nav>
+  </div>
+</header>
+
 
   <main class="container">
     <div class="card auth-card">
@@ -52,7 +51,7 @@
   </main>
 
 <script>
-  const form = document.getElementById("loginForm");
+  const form = document.getElementById("registerForm");
   const statusEl = document.getElementById("status");
 
   form.addEventListener("submit", async (e) => {
@@ -60,6 +59,7 @@
     statusEl.textContent = "";
 
     const payload = {
+      name: form.elements.name.value.trim(),
       email: form.elements.email.value.trim(),
       password: form.elements.password.value
     };
@@ -73,18 +73,19 @@
 
       const text = await res.text();
 
-      if (res.ok) {
-        window.location.href = "index.html";
+      if (!res.ok) {
+        statusEl.textContent = `Error (${res.status}): ${text}`;
         return;
       }
 
-      statusEl.textContent = `Error (${res.status}): ${text}`;
+      statusEl.textContent = text;
+      window.location.href = "index.html";
+
     } catch (err) {
       statusEl.textContent = "Network error: " + (err?.message || err);
     }
   });
 </script>
-
 
 </body>
 </html>

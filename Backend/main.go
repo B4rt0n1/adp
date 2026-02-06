@@ -94,9 +94,6 @@ func main() {
 	devMode := os.Getenv("DEV") == "1"
 
 	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		log.Fatal("MONGODB_URI missing (use your Atlas mongodb+srv://... connection string)")
-	}
 	dbName := getenv("MONGODB_DB", "goedu")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -144,7 +141,7 @@ func main() {
 	r.Get("/*", s.serveAnyStatic())
 
 	addr := ":" + port
-	log.Printf("Server: http://localhost%s (MongoDB Atlas DB=%s)", addr, dbName)
+	log.Printf("Server: http://localhost%s", addr)
 	log.Fatal(http.ListenAndServe(addr, r))
 }
 
