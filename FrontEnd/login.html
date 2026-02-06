@@ -67,13 +67,19 @@
       });
 
       const text = await res.text();
-      statusEl.textContent = res.ok ? text : `Error (${res.status}): ${text}`;
-      if (res.ok) form.reset();
+
+      if (res.ok) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      statusEl.textContent = `Error (${res.status}): ${text}`;
     } catch (err) {
       statusEl.textContent = "Network error: " + (err?.message || err);
     }
   });
 </script>
+
 
 </body>
 </html>
