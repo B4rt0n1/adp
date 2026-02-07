@@ -130,5 +130,6 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		ID:    u.ID.Hex(),
 		Name:  u.Name,
 		Email: u.Email,
+		Photo: u.Photo,
 	})
 }

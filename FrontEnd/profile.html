@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GoEdu - Profile</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="logo">GoEdu</a>
+
+            <nav class="main-nav" id="mainNav">
+                <a href="/">Home</a>
+                <a href="/handbooks">Handbooks</a>
+                <a href="/go">Go</a>
+                <a href="/about">About</a>
+            </nav>
+
+            <a href="/profile" class="profile-img"><img src="Profile-Images/default.jpg" alt="img" class="profile-img"></a>
+        </div>
+    </header>
+
+    <div class="profile-container">
+      
+        <div class="profile-card">
+            <h2>Your Profile</h2>
+            <div class="profile-photo">
+              <img class="profile-img" id='profile-image' src="/Profile-Images/default.jpg" alt="Profile">
+              <input type="file" id="profileFile" accept="image/*" style="display:none;">
+              <button class="secondary-btn" id="changePhotoBtn">Change Photo</button>
+            </div>
+
+            <div class="profile-field">
+                <span>Name:</span>
+                <span id="profileName">Loading...</span>
+                <input type="text" id="profileNameInput" style="display:none;" />
+            </div>
+
+            <div class="profile-field">
+                <span>Email:</span>
+                <span id="profileEmail">Loading...</span>
+                <input type="email" id="profileEmailInput" style="display:none;" />
+            </div>
+
+            <div class="profile-actions">
+                <button class="primary-btn" id="logoutBtn">Logout</button>
+                <button class="secondary-btn" id="editBtn">Edit Profile</button>
+                <button class="secondary-btn" id="saveBtn" style="display:none;">Save</button>
+                <button class="secondary-btn" id="cancelBtn" style="display:none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+async function loadProfile() {
+  const nameEl = document.getElementById("profileName");
+  const emailEl = document.getElementById("profileEmail");
+  const nameInput = document.getElementById("profileNameInput");
+  const emailInput = document.getElementById("profileEmailInput");
+
+  try {
+    const res = await fetch("/api/me", { credentials: "same-origin" });
+    if (!res.ok) throw new Error("Not authenticated");
+    const user = await res.json();
+
+    nameEl.textContent = user.name;
+    emailEl.textContent = user.email;
+    nameInput.value = user.name;
+    emailInput.value = user.email;
+  } catch (e) {
+    nameEl.textContent = "Guest";
+    emailEl.textContent = "-";
+    document.getElementById("logoutBtn").outerHTML = `<a href="/login" class="primary-btn">Login</a>`;
+    document.getElementById("changePhotoBtn").outerHTML = ``;
+    document.getElementById("editBtn").outerHTML = ``;
+  }
+}
+
+const editBtn = document.getElementById("editBtn");
+const saveBtn = document.getElementById("saveBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const profileName = document.getElementById("profileName");
+const profileEmail = document.getElementById("profileEmail");
+const profileNameInput = document.getElementById("profileNameInput");
+const profileEmailInput = document.getElementById("profileEmailInput");
+
+editBtn.addEventListener("click", () => {
+  profileName.style.display = "none";
+  profileEmail.style.display = "none";
+  profileNameInput.style.display = "inline-block";
+  profileEmailInput.style.display = "inline-block";
+  editBtn.style.display = "none";
+  saveBtn.style.display = "inline-block";
+  cancelBtn.style.display = "inline-block";
+});
+
+cancelBtn.addEventListener("click", () => {
+  profileName.style.display = "inline";
+  profileEmail.style.display = "inline";
+  profileNameInput.style.display = "none";
+  profileEmailInput.style.display = "none";
+  editBtn.style.display = "inline-block";
+  saveBtn.style.display = "none";
+  cancelBtn.style.display = "none";
+});
+
+saveBtn.addEventListener("click", async () => {
+  const updatedName = profileNameInput.value.trim();
+  const updatedEmail = profileEmailInput.value.trim();
+
+  if (!updatedName || !updatedEmail) {
+    alert("Name and Email cannot be empty");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/update-profile", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: updatedName, email: updatedEmail })
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Update failed");
+    }
+
+    profileName.textContent = updatedName;
+    profileEmail.textContent = updatedEmail;
+
+    profileName.style.display = "inline";
+    profileEmail.style.display = "inline";
+    profileNameInput.style.display = "none";
+    profileEmailInput.style.display = "none";
+    editBtn.style.display = "inline-block";
+    saveBtn.style.display = "none";
+    cancelBtn.style.display = "none";
+
+    alert("Profile updated successfully!");
+  } catch (e) {
+    alert(e.message);
+    console.error(e);
+  }
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await fetch("/api/logout", { method: "POST", credentials: "same-origin" });
+  window.location.href = "/login";
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const profileImgs = document.querySelectorAll(".profile-img");
+
+  try {
+    const res = await fetch("/api/me", { credentials: "same-origin" });
+    if (!res.ok) throw new Error("Not authenticated");
+    const user = await res.json();
+
+    const photoSrc = user.photo
+      ? "/Profile-Images/" + user.photo + "?t=" + new Date().getTime()
+      : "/Profile-Images/default.jpg";
+
+    profileImgs.forEach(img => {
+      img.src = photoSrc;
+    });
+
+  } catch (e) {
+    profileImgs.forEach(img => {
+      img.src = "/Profile-Images/default.jpg";
+    });
+  }
+});
+
+loadProfile();
+
+const changePhotoBtn = document.getElementById("changePhotoBtn");
+const profileFile = document.getElementById("profileFile");
+const profileImg = document.getElementById("profile-image");
+
+changePhotoBtn.addEventListener("click", () => profileFile.click());
+
+profileFile.addEventListener("change", async () => {
+  if (!profileFile.files || profileFile.files.length === 0) return;
+
+  const formData = new FormData();
+  formData.append("photo", profileFile.files[0]);
+
+  try {
+    const res = await fetch("/api/upload-photo", {
+      method: "POST",
+      credentials: "same-origin",
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Upload failed");
+
+    const data = await res.json();
+    profileImg.src = data.url + "?t=" + new Date().getTime();
+    alert("Photo updated!");
+  } catch (e) {
+    console.error(e);
+    alert("Failed to upload photo");
+  }
+});
+</script>
+
+</body>
+</html>

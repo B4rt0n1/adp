@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"goedu/internal/server"
+	server "goedu/Internal/Server"
 )
 
 func main() {

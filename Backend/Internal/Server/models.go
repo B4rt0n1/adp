@@ -11,6 +11,7 @@ type userDoc struct {
 	Name      string             `bson:"name"`
 	Email     string             `bson:"email"`
 	PassHash  []byte             `bson:"passHash"`
+	Photo     string             `bson:"photo,omitempty"`
 	CreatedAt time.Time          `bson:"createdAt"`
 }
 
