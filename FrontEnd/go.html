@@ -6,6 +6,10 @@
     <title>Go Practice - GoEdu</title>
     <link rel="stylesheet" href="style.css" />
     <style>
+        body {
+            display: none;
+        }
+
         .task-list {
             display: flex;
             flex-direction: column;
@@ -49,18 +53,20 @@
     </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="container">
-    <a href="/" class="logo">GoEdu</a>
-    <nav class="main-nav" id="mainNav">
-      <a href="/">Home</a>
-      <a href="/handbooks">Handbooks</a>
-      <a id="authInvise"></a>
-      <a href="/about">About</a>
-      <a href="/registration" id="authSlot">Register</a>
-    </nav>
-  </div>
-</header>
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="logo">GoEdu</a>
+
+            <nav class="main-nav" id="mainNav">
+                <a href="/">Home</a>
+                <a href="/handbooks">Handbooks</a>
+                <a href="/go" id="authInvise">Go</a>
+                <a href="/about">About</a>
+            </nav>
+
+            <a href="/profile" class="profile-img"><img src="Profile-Images/default.jpg" alt="img" class="profile-img"></a>
+        </div>
+    </header>
 
     <div class="content-wrapper">
         <aside class="sidebar">
@@ -122,46 +128,49 @@
     </footer>
 
 <script>
-async function updateNavbar() {
-  const authSlot = document.getElementById("authSlot");
-  if (!authSlot) return;
-
-  let res;
+async function blockIfNotAuth() {
   try {
-    res = await fetch("/api/me", { credentials: "same-origin" });
-  } catch (e) {
-    console.error("Auth check failed", e);
-    return;
-  }
+    const res = await fetch("/api/me", { credentials: "same-origin" });
 
-  if (res.ok) {
-    const user = await res.json();
+    if (!res.ok) {
+      window.location.href = "/login";
+      return;
+    }
 
-    authSlot.outerHTML = `
-      <a href="#" id="logoutLink">Logout</a>
-    `;
+    document.body.style.display = "block";
 
-    authInvise.outerHTML = `<a href="/go">Go</a>`;
-
-    document.getElementById("logoutLink")
-      .addEventListener("click", async (e) => {
-        e.preventDefault();
-        await fetch("/api/logout", {
-          method: "POST",
-          credentials: "same-origin"
-        });
-        window.location.href = "/login";
-      });
-
-  } else {
-    authSlot.outerHTML = `
-      <a href="/registration">Register</a>
-    `;
-    authInvise.outerHTML = ``;
+  } catch (err) {
+    console.error("Auth check failed", err);
+    window.location.href = "/login";
   }
 }
 
-updateNavbar();
+blockIfNotAuth();
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const profileImgs = document.querySelectorAll(".profile-img");
+
+    try {
+        const res = await fetch("/api/me", { credentials: "same-origin" });
+        if (!res.ok) throw new Error("Not authenticated");
+
+        const user = await res.json();
+
+        const photoSrc = user.photo
+        ? "/Profile-Images/" + user.photo + "?t=" + Date.now()
+        : "/Profile-Images/default.jpg";
+
+        profileImgs.forEach(img => {
+        img.src = photoSrc;
+        });
+
+    } catch (e) {
+        profileImgs.forEach(img => {
+        img.src = "/Profile-Images/default.jpg";
+        });
+    }
+});
 </script>
+
 </body>
 </html>
