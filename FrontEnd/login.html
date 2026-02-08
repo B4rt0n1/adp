@@ -49,40 +49,7 @@
     </div>
   </main>
 
-<script>
-  const form = document.getElementById("loginForm");
-  const statusEl = document.getElementById("status");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    statusEl.textContent = "";
-
-    const payload = {
-      email: form.elements.email.value.trim(),
-      password: form.elements.password.value
-    };
-
-    try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const text = await res.text();
-
-      if (res.ok) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      statusEl.textContent = `Error (${res.status}): ${text}`;
-    } catch (err) {
-      statusEl.textContent = "Network error: " + (err?.message || err);
-    }
-  });
-</script>
-
+<script src="main.js"></script>
 
 </body>
 </html>

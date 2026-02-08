@@ -61,31 +61,7 @@
         <p>Saken Akhmediyar, Aron Davlyudov, Aslan Aldashev</p>
     </footer>
 
-<script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const profileImgs = document.querySelectorAll(".profile-img");
-
-    try {
-        const res = await fetch("/api/me", { credentials: "same-origin" });
-        if (!res.ok) throw new Error("Not authenticated");
-
-        const user = await res.json();
-
-        const photoSrc = user.photo
-        ? "/Profile-Images/" + user.photo + "?t=" + Date.now()
-        : "/Profile-Images/default.jpg";
-
-        profileImgs.forEach(img => {
-        img.src = photoSrc;
-        });
-
-    } catch (e) {
-        profileImgs.forEach(img => {
-        img.src = "/Profile-Images/default.jpg";
-        });
-    }
-  });
-</script>
+<script src="main.js"></script>
 
 </body>
 </html>
