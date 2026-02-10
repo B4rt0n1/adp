@@ -197,6 +197,14 @@ body {
     filter: brightness(1.05);
 }
 
+.danger-btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d32f2f;
+    background: #d32f2f;
+    color: #fff;
+}
+
 .code-editor .secondary-btn {
     padding: 10px 12px;
     border-radius: 10px;
