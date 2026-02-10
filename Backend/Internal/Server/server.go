@@ -10,12 +10,13 @@ import (
 )
 
 type Server struct {
-	client    *mongo.Client
-	db        *mongo.Database
-	users     *mongo.Collection
-	sessions  *mongo.Collection
-	staticDir string
-	devMode   bool
+	client           *mongo.Client
+	db               *mongo.Database
+	users            *mongo.Collection
+	sessions         *mongo.Collection
+	code_submissions *mongo.Collection
+	staticDir        string
+	devMode          bool
 
 	rateMu   sync.Mutex
 	rateByIP map[string][]time.Time

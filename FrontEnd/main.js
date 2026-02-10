@@ -168,6 +168,9 @@ async function blockIfNotAuth() {
       window.location.href = "/login";
       return;
     }
+
+    const me = await res.json();
+    window.userID = me.id;
     document.body.style.display = "block";
   } catch (err) {
     console.error("Auth check failed", err);

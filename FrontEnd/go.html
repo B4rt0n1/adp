@@ -96,6 +96,16 @@
                     <p class="hint">Tip: The short-hand operator is <code>:=</code></p>
                 </article>
 
+                <div>
+                    <textarea class="code-input"></textarea>
+                    <div>
+                        <button id = "submitCode" class="primary-btn">Submit Code</button>
+                        <button id = "reset" class="secondary-btn">Reset</button>
+                    </div>
+                </div>
+                
+
+
                 <article class="task-item" id="task-2">
                     <span class="tag">Logic</span>
                     <h3>2. If/Else Statements</h3>
@@ -130,6 +140,48 @@
 <script src="main.js"></script>
 <script>
 blockIfNotAuth();
+
+const codeInput = document.querySelector('.code-input');
+const submitButton = document.getElementById("submitCode");
+const resetButton = document.getElementById("reset");
+
+codeInput.addEventListener('input', () => {
+    codeInput.style.height = codeInput.scrollHeight + 'px';
+});
+
+submitButton.addEventListener("click", async () => {
+    const userCode = codeInput.value.trim();
+    if (!userCode) {
+        alert("Please enter your code before submitting.");
+        return;
+    }
+
+
+    try {
+const res = await fetch("/api/save-code", {
+  method: "POST",
+  credentials: "same-origin",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ userID: window.userID, lessonID: "1", code: userCode })
+});
+
+        if (!res.ok) {
+            throw new Error("Failed to submit code");
+        }
+
+        alert("Code submitted successfully");
+    } catch (e){
+        console.error(e);
+        alert("Failed to submit code.")
+    }
+}); 
+
+resetButton.addEventListener("click", () => {
+    codeInput.value = "";
+    codeInput.style.height = "auto";
+});
+
+
 </script>
 
 </body>

@@ -19,6 +19,7 @@ func (s *Server) setupRouter() {
 		api.Get("/me", s.withSecurity(s.requireAuth(s.handleMe)))
 		api.Post("/update-profile", s.withSecurity(s.requireAuth(s.handleUpdateProfile)))
 		api.Post("/upload-photo", s.withSecurity(s.requireAuth(s.handleUploadPhoto)))
+		api.Post("/save-code", s.withSecurity(s.requireAuth(s.handleSaveCode)))
 	})
 
 	r.Get("/Profile-Images/*", s.serveAnyStatic())

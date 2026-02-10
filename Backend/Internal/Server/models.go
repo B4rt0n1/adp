@@ -22,3 +22,12 @@ type sessionDoc struct {
 	ExpiresAt time.Time          `bson:"expiresAt"`
 	CreatedAt time.Time          `bson:"createdAt"`
 }
+
+type codeSubmissionDoc struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
+	UserID    primitive.ObjectID `bson:"userId"`
+	LessonID  primitive.ObjectID `bson:"lessonId"`
+	Code      string             `bson:"code"`
+	CreatedAt time.Time          `bson:"createdAt"`
+	UpdatedAt time.Time          `bson:"updatedAt"`
+}

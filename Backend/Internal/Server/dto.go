@@ -17,3 +17,9 @@ type meResp struct {
 	Email string `json:"email"`
 	Photo string `json:"photo"`
 }
+
+type saveCodeReq struct {
+	UserID   string `json:"userId"`
+	LessonID string `json:"lessonId"`
+	Code     string `json:"code"`
+}
