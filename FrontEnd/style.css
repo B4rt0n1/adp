@@ -197,7 +197,7 @@ body {
     filter: brightness(1.05);
 }
 
-.secondary-btn {
+.code-editor .secondary-btn {
     padding: 10px 12px;
     border-radius: 10px;
     border: 1px solid #1f1f1f;
@@ -207,6 +207,7 @@ body {
     font-weight: 700;
 }
 
+
 .code-input {
     padding: 10px 12px;
     border-radius: 10px;
@@ -214,7 +215,7 @@ body {
     background: #fff;
     font-size: 1rem;
     width: 100%;
-    resize: vertical;
+    min-height: 100px;
 }
 
 .helper-text {

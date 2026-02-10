@@ -96,10 +96,11 @@
                     <p class="hint">Tip: The short-hand operator is <code>:=</code></p>
                 </article>
 
-                <div>
+                <div class = "code-editor">
                     <textarea class="code-input"></textarea>
                     <div>
                         <button id = "submitCode" class="primary-btn">Submit Code</button>
+                        <button id = "run" class="primary-btn">Run Code</button>
                         <button id = "reset" class="secondary-btn">Reset</button>
                     </div>
                 </div>
@@ -140,14 +141,13 @@
 <script src="main.js"></script>
 <script>
 blockIfNotAuth();
+loadSavedCode();
 
 const codeInput = document.querySelector('.code-input');
 const submitButton = document.getElementById("submitCode");
 const resetButton = document.getElementById("reset");
 
-codeInput.addEventListener('input', () => {
-    codeInput.style.height = codeInput.scrollHeight + 'px';
-});
+codeInput.addEventListener('input', () => autoResize(codeInput));
 
 submitButton.addEventListener("click", async () => {
     const userCode = codeInput.value.trim();
@@ -158,12 +158,12 @@ submitButton.addEventListener("click", async () => {
 
 
     try {
-const res = await fetch("/api/save-code", {
-  method: "POST",
-  credentials: "same-origin",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ userID: window.userID, lessonID: "1", code: userCode })
-});
+        const res = await fetch("/api/save-code", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userID: window.userID, lessonID: "1", code: userCode })
+        });
 
         if (!res.ok) {
             throw new Error("Failed to submit code");
@@ -181,6 +181,28 @@ resetButton.addEventListener("click", () => {
     codeInput.style.height = "auto";
 });
 
+async function loadSavedCode() {
+    const lessonId = "1";
+    try {
+        const res = await fetch(`/savedCode?lessonId=${lessonId}`, { credentials: "same-origin" })
+
+        if (!res.ok) {
+            throw new Error("Failed to load saved code");
+        }
+
+        const data = await res.json();
+        codeInput.value = data.code || "";
+        autoResize(codeInput);
+
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
 
 </script>
 

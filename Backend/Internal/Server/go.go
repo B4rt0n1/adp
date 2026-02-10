@@ -8,6 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -47,4 +48,34 @@ func (s *Server) handleSaveCode(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	fmt.Fprint(w, "Code saved")
+}
+
+func (s *Server) handleGetSavedCode(w http.ResponseWriter, r *http.Request) {
+	u := r.Context().Value(ctxUserKey{}).(userDoc)
+	lessonID := r.URL.Query().Get("lessonId")
+	if lessonID == "" {
+		http.Error(w, "lessonId required", 400)
+		return
+	}
+
+	filter := bson.M{"userId": u.ID, "lessonId": lessonID}
+
+	var doc struct {
+		Code string `bson:"code" json:"code"`
+	}
+
+	err := s.code_submissions.FindOne(
+		r.Context(), filter,
+	).Decode(&doc)
+
+	if err == mongo.ErrNoDocuments {
+		writeJSON(w, http.StatusOK, map[string]string{"code": ""})
+		return
+	}
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, doc)
 }

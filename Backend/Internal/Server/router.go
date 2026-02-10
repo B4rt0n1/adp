@@ -31,6 +31,7 @@ func (s *Server) setupRouter() {
 	r.Get("/about", s.serveFile("about.html"))
 	r.Get("/profile", s.serveFile("profile.html"))
 	r.Get("/*", s.serveAnyStatic())
+	r.Get("/savedCode", s.withSecurity(s.requireAuth(s.handleGetSavedCode)))
 
 	s.router = r
 	frontendDir := "../FrontEnd"
