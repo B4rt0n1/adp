@@ -16,7 +16,7 @@ func New() (*Server, error) {
 	_ = godotenv.Load()
 
 	port := getenv("PORT", "8080")
-	_ = port // используется в Run
+	_ = port
 	staticDir := getenv("STATIC_DIR", ".")
 	devMode := os.Getenv("DEV") == "1"
 
