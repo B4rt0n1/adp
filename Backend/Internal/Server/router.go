@@ -21,6 +21,7 @@ func (s *Server) setupRouter() {
 		api.Put("/update-profile", s.withSecurity(s.requireAuth(s.handleUpdateProfile)))
 		api.Patch("/upload-photo", s.withSecurity(s.requireAuth(s.handleUploadPhoto)))
 		api.Post("/save-code", s.withSecurity(s.requireAuth(s.handleSaveCode)))
+		api.Post("/run-code", s.withSecurity(s.requireAuth(runHandler)))
 		api.Route("/admin", func(admin chi.Router) {
 			admin.Get("/users", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminListUsers))))
 			admin.Put("/users/{id}", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminUpdateUser))))
@@ -49,10 +50,6 @@ func (s *Server) setupRouter() {
 
 	r.Get("/*", s.serveAnyStatic())
 	r.Get("/savedCode", s.withSecurity(s.requireAuth(s.handleGetSavedCode)))
-
-	s.router = r
-	frontendDir := "../FrontEnd"
-	profileImagesDir := filepath.Join(frontendDir, "Profile-Images")
 
 	s.router.Get("/Profile-Images/*", func(w http.ResponseWriter, r *http.Request) {
 		file := chi.URLParam(r, "*")

@@ -1,9 +1,14 @@
 package server
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -78,4 +83,52 @@ func (s *Server) handleGetSavedCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, doc)
+}
+
+func runHandler(w http.ResponseWriter, r *http.Request) {
+	var req saveCodeReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad json", http.StatusBadRequest)
+		return
+	}
+
+	dir, err := os.MkdirTemp("", "gorun-*")
+	if err != nil {
+		http.Error(w, "tempdir failed", 500)
+		return
+	}
+	defer os.RemoveAll(dir)
+
+	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(req.Code), 0644); err != nil {
+		http.Error(w, "write failed", 500)
+		return
+	}
+
+	args := []string{
+		"run", "--rm",
+		"-v", dir + ":/work",
+		"-w", "/work",
+		"golang:latest",
+		"go", "run", "main.go",
+	}
+
+	cmd := exec.CommandContext(r.Context(), "docker", args...)
+	var outb, errb bytes.Buffer
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
+
+	exitCode := 0
+	if err := cmd.Run(); err != nil {
+		// If docker/go run fails, we still return stderr.
+		exitCode = 1
+	}
+
+	resp := RunResp{
+		Stdout:   outb.String(),
+		Stderr:   errb.String(),
+		ExitCode: exitCode,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
 }

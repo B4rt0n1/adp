@@ -100,12 +100,15 @@
                 <div class = "code-editor">
                     <textarea class="code-input"></textarea>
                     <div>
-                        <button id = "submitCode" class="primary-btn">Submit Code</button>
+                        <button id = "saveCode" class="primary-btn">Save Code</button>
                         <button id = "run" class="primary-btn">Run Code</button>
                         <button id = "reset" class="secondary-btn">Reset</button>
                     </div>
+                    <div class="code-output">
+                        <h3>Output:</h3>
+                        <pre id="outputArea"></pre>
                 </div>
-                
+                <br> <br>
 
 
                 <article class="task-item" id="task-2">
@@ -145,12 +148,14 @@ blockIfNotAuth();
 loadSavedCode();
 
 const codeInput = document.querySelector('.code-input');
-const submitButton = document.getElementById("submitCode");
+const saveButton = document.getElementById("saveCode");
 const resetButton = document.getElementById("reset");
+const outputArea = document.getElementById("outputArea");
+const runButton = document.getElementById("run");
 
 codeInput.addEventListener('input', () => autoResize(codeInput));
 
-submitButton.addEventListener("click", async () => {
+saveButton.addEventListener("click", async () => {
     const userCode = codeInput.value.trim();
     if (!userCode) {
         alert("Please enter your code before submitting.");
@@ -176,6 +181,35 @@ submitButton.addEventListener("click", async () => {
         alert("Failed to submit code.")
     }
 }); 
+
+runButton.addEventListener("click", async () => {
+    const userCode = codeInput.value.trim();
+    if (!userCode) {
+        alert("Please enter your code before running.");
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/run-code", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userID: window.userID, lessonID: "1", code: userCode })
+        });
+
+        if (!res.ok) {
+            throw new Error("Failed to run code");
+        }
+
+        const data = await res.json();
+        outputArea.textContent =
+        (data.stdout || "") +
+        (data.stderr ? "\n" + data.stderr : "");
+    } catch (e) {
+        console.error(e);
+        alert("Failed to run code.");
+    }
+});
 
 resetButton.addEventListener("click", () => {
     codeInput.value = "";

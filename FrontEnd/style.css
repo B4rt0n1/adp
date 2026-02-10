@@ -226,6 +226,14 @@ body {
     min-height: 100px;
 }
 
+.code-output {
+    background: #f7f7f7;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
 .helper-text {
     font-size: 0.95rem;
     color: #444;
