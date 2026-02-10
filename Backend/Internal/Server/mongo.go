@@ -37,14 +37,15 @@ func New() (*Server, error) {
 	db := client.Database(dbName)
 
 	s := &Server{
-		client:     client,
-		db:         db,
-		users:      db.Collection("users"),
-		sessions:   db.Collection("sessions"),
-		staticDir:  staticDir,
-		devMode:    devMode,
-		rateByIP:   make(map[string][]time.Time),
-		emailRegex: regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`),
+		client:           client,
+		db:               db,
+		users:            db.Collection("users"),
+		sessions:         db.Collection("sessions"),
+		code_submissions: db.Collection("code_submissions"),
+		staticDir:        staticDir,
+		devMode:          devMode,
+		rateByIP:         make(map[string][]time.Time),
+		emailRegex:       regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`),
 	}
 
 	if err := s.ensureIndexes(context.Background()); err != nil {

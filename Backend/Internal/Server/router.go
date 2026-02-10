@@ -19,6 +19,7 @@ func (s *Server) setupRouter() {
 		api.Get("/me", s.withSecurity(s.requireAuth(s.handleMe)))
 		api.Put("/update-profile", s.withSecurity(s.requireAuth(s.handleUpdateProfile)))
 		api.Patch("/upload-photo", s.withSecurity(s.requireAuth(s.handleUploadPhoto)))
+		api.Post("/save-code", s.withSecurity(s.requireAuth(s.handleSaveCode)))
 		api.Route("/admin", func(admin chi.Router) {
 			admin.Get("/users", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminListUsers))))
 			admin.Put("/users/{id}", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminUpdateUser))))
