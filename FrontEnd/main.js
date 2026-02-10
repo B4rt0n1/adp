@@ -3,6 +3,7 @@ async function loadProfile() {
   const emailEl = document.getElementById("profileEmail");
   const nameInput = document.getElementById("profileNameInput");
   const emailInput = document.getElementById("profileEmailInput");
+  const roleEl = document.getElementById("profileRole");
 
   try {
     const res = await fetch("/api/me", { credentials: "same-origin" });
@@ -24,6 +25,9 @@ async function loadProfile() {
 
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) logoutBtn.outerHTML = `<a href="/login" class="primary-btn">Login</a>`;
+
+    const deleteBtn = document.getElementById("deleteBtn");
+    if (deleteBtn) deleteBtn.outerHTML = ``;
 
     const changePhotoBtn = document.getElementById("changePhotoBtn");
     if (changePhotoBtn) changePhotoBtn.outerHTML = ``;
@@ -87,7 +91,7 @@ function setupProfileEdit() {
 
       try {
         const res = await fetch("/api/update-profile", {
-          method: "POST",
+          method: "PUT",
           credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: updatedName, email: updatedEmail })
@@ -133,7 +137,7 @@ function setupPhotoUpload() {
 
       try {
         const res = await fetch("/api/upload-photo", {
-          method: "POST",
+          method: "PATCH",
           credentials: "same-origin",
           body: formData
         });
@@ -175,7 +179,58 @@ async function blockIfNotAuth() {
   }
 }
 
-loadProfile();
-setupProfileEdit();
-setupPhotoUpload();
-setupLogout();
+function setupDeleteAccount() {
+  const deleteBtn = document.getElementById("deleteBtn");
+
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) return;
+
+      try {
+        const res = await fetch("/api/delete-account", {
+          method: "DELETE",
+          credentials: "same-origin",
+        });
+        if (!res.ok) throw new Error("Failed to delete account");
+
+        alert("Account deleted successfully");
+        window.location.href = "/login";
+      } catch (e) {
+        console.error(e);
+        alert("Failed to delete account");
+      }
+    });
+  }
+}
+
+async function checkAdmin() {
+    try {
+        const res = await fetch("/api/me", { credentials: "same-origin" });
+        if (!res.ok) throw new Error("Not authenticated");
+        const user = await res.json();
+
+        const roleEl = document.getElementById("profileRole");
+        if (user.role === "admin" && roleEl) {
+            roleEl.parentElement.style.display = "flex";
+        }
+
+        if (user.role === "admin") {
+            document.querySelectorAll(".admin-nav").forEach(el => {
+                el.style.display = "";
+                el.style.color = "red";
+            });
+        }
+
+    } catch (err) {
+        console.error("Failed to fetch user info:", err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadProfile();
+  setupProfileEdit();
+  setupPhotoUpload();
+  setupLogout();
+  setupDeleteAccount();
+  checkAdmin();
+});

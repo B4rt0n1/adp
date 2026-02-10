@@ -100,6 +100,23 @@ func (s *Server) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func (s *Server) requireAdmin(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		u, ok := r.Context().Value(ctxUserKey{}).(userDoc)
+		if !ok {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		if u.Role != "admin" {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		next(w, r)
+	}
+}
+
 func (s *Server) authenticate(r *http.Request) (userDoc, error) {
 	raw, err := readSessionCookie(r)
 	if err != nil {

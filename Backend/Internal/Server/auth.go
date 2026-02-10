@@ -47,6 +47,7 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 		Name:      req.Name,
 		Email:     req.Email,
 		PassHash:  passHash,
+		Role:      "user",
 		CreatedAt: time.Now().UTC(),
 	}
 
@@ -124,12 +125,30 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Logged out")
 }
 
+func (s *Server) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
+	u := r.Context().Value(ctxUserKey{}).(userDoc)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+	_, _ = s.users.DeleteOne(ctx, bson.M{"_id": u.ID})
+
+	raw, err := readSessionCookie(r)
+	if err == nil {
+		th := sha256.Sum256([]byte(raw))
+		_, _ = s.sessions.DeleteOne(ctx, bson.M{"tokenHash": th[:]})
+	}
+
+	clearCookie(w, s.devMode)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	fmt.Fprint(w, "Account deleted")
+}
+
 func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 	u := r.Context().Value(ctxUserKey{}).(userDoc)
 	writeJSON(w, http.StatusOK, meResp{
 		ID:    u.ID.Hex(),
 		Name:  u.Name,
 		Email: u.Email,
+		Role:  u.Role,
 		Photo: u.Photo,
 	})
 }
