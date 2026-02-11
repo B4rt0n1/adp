@@ -71,71 +71,37 @@
 
     <div class="content-wrapper">
         <aside class="sidebar">
-            <ul class="toc">
-                <li><a href="#syntax-ref">Quick Syntax Ref</a></li>
-                <li><a href="#task-1">Task 1: Variables</a></li>
-                <li><a href="#task-2">Task 2: Conditionals</a></li>
-                <li><a href="#task-3">Task 3: Functions</a></li>
-            </ul>
         </aside>
 
         <main class="main-content">
-            <section id="syntax-ref">
-                <h2>Go Practice Arena</h2>
-                <p>Apply what you've learned in the handbook. Complete these three fundamental Go tasks.</p>
-            </section>
+    <section id="syntax-ref">
+        <h2>Go Practice Arena</h2>
+        <p>Select a task from the list below to start coding.</p>
+    </section>
 
-            <div class="task-list">
-                <article class="task-item" id="task-1">
-                    <span class="tag">Basic</span>
-                    <h3>1. Variable Declaration</h3>
-                    <p>Declare an integer variable named <code>age</code> and assign it the value of <code>25</code> using the short-hand declaration operator.</p>
-                    <div class="code-box">
-                        // Write your code below<br>
-                        age := 25
-                    </div>
-                    <p class="hint">Tip: The short-hand operator is <code>:=</code></p>
-                </article>
+    <section class="tasks-section">
+        <h2>Available Tasks</h2>
+        <div class="task-list" id="taskContainer">
+            <p>Loading tasks...</p>
+        </div>
+    </section>
 
-                <div class = "code-editor">
-                    <textarea class="code-input"></textarea>
-                    <div>
-                        <button id = "saveCode" class="primary-btn">Save Code</button>
-                        <button id = "run" class="primary-btn">Run Code</button>
-                        <button id = "reset" class="secondary-btn">Reset</button>
-                    </div>
-                    <div class="code-output">
-                        <h3>Output:</h3>
-                        <pre id="outputArea"></pre>
-                </div>
-                <br> <br>
+    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ccc;">
 
-
-                <article class="task-item" id="task-2">
-                    <span class="tag">Logic</span>
-                    <h3>2. If/Else Statements</h3>
-                    <p>Complete the logic to check if a number <code>n</code> is even.</p>
-                    <div class="code-box">
-                        if n % 2 == 0 {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;fmt.Println("Even")<br>
-                        } else {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;// Your code here<br>
-                        }
-                    </div>
-                </article>
-
-                <article class="task-item" id="task-3">
-                    <span class="tag">Functions</span>
-                    <h3>3. Returning Values</h3>
-                    <p>Write a function <code>greet</code> that takes a string <code>name</code> and returns "Hello " + name.</p>
-                    <div class="code-box">
-                        func greet(name string) string {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return "Hello " + name<br>
-                        }
-                    </div>
-                </article>
-            </div>
-        </main>
+    <div class="code-editor">
+        <h3>Code Editor</h3>
+        <textarea class="code-input" id="codeInput" placeholder="Select a task above and click 'Solve' to load code here..."></textarea>
+        <div style="margin-top: 10px;">
+            <button id="saveCode" class="primary-btn">Save Code</button>
+            <button id="run" class="primary-btn">Run Code</button>
+            <button id="reset" class="secondary-btn">Reset</button>
+        </div>
+        <div class="code-output">
+            <h3>Output:</h3>
+            <pre id="outputArea"></pre>
+        </div>
+    </div>
+</main>
     </div>
 
     <footer class="site-footer">
@@ -144,6 +110,48 @@
 
 <script src="main.js"></script>
 <script>
+async function loadTasksFromDB() {
+    const container = document.getElementById('taskContainer');
+    try {
+        const res = await fetch("/api/tasks", { credentials: "same-origin" });
+        if (!res.ok) throw new Error("Failed");
+        
+        const tasks = await res.json();
+
+        if (tasks.length === 0) {
+            container.innerHTML = "<p>No tasks yet.</p>";
+            return;
+        }
+
+        container.innerHTML = tasks.map((task, index) => `
+            <article class="task-item" style="margin-bottom: 15px; border-left: 4px solid #007d9c;">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>${index + 1}. ${task.title} <small class="tag">${task.tag}</small></h3>
+                </div>
+                <p>${task.description}</p>
+                <button onclick="applyCode(\`${task.starterCode.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)" 
+                        style="background:#007d9c; color:white; border:none; padding:5px 10px; cursor:pointer; margin-top:5px;">
+                    Solve Task
+                </button>
+            </article>
+        `).join('');
+
+    } catch (e) {
+        console.error(e);
+        container.innerHTML = "Error loading tasks.";
+    }
+}
+
+function applyCode(code) {
+    const editor = document.querySelector('.code-input');
+    editor.value = code;
+    editor.scrollIntoView({ behavior: 'smooth' });
+    editor.style.height = "auto";
+    editor.style.height = editor.scrollHeight + "px";
+}
+document.addEventListener('DOMContentLoaded', loadTasksFromDB);
+
+
 blockIfNotAuth();
 loadSavedCode();
 
