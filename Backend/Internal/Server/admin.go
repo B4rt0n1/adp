@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"go.mongodb.org/mongo-driver/bson"
@@ -99,4 +100,32 @@ func (s *Server) DeleteUser(ctx context.Context, id string) error {
 		"_id": objID,
 	})
 	return err
+}
+
+func (s *Server) handleAdminCreateTask(w http.ResponseWriter, r *http.Request) {
+	var task Task
+	if err := decodeJSON(r, &task); err != nil {
+		http.Error(w, "Invalid JSON", 400)
+		return
+	}
+	task.ID = primitive.NewObjectID()
+	task.CreatedAt = time.Now().UTC()
+
+	_, err := s.tasks.InsertOne(r.Context(), task)
+	if err != nil {
+		http.Error(w, "DB Error", 500)
+		return
+	}
+	writeJSON(w, http.StatusCreated, task)
+}
+
+func (s *Server) handleAdminDeleteTask(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, _ := primitive.ObjectIDFromHex(idStr)
+	_, err := s.tasks.DeleteOne(r.Context(), bson.M{"_id": id})
+	if err != nil {
+		http.Error(w, "Delete failed", 500)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

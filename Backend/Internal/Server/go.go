@@ -132,3 +132,23 @@ func runHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
 }
+
+func (s *Server) handleListTasks(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+	opts := options.Find().SetSort(bson.M{"createdAt": -1})
+	cur, err := s.tasks.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		http.Error(w, "Database error", 500)
+		return
+	}
+	defer cur.Close(ctx)
+
+	var tasks []Task = []Task{}
+	if err := cur.All(ctx, &tasks); err != nil {
+		http.Error(w, "Error decoding tasks", 500)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, tasks)
+}

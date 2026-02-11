@@ -15,6 +15,7 @@ type Server struct {
 	users            *mongo.Collection
 	sessions         *mongo.Collection
 	code_submissions *mongo.Collection
+	tasks            *mongo.Collection
 	staticDir        string
 	devMode          bool
 

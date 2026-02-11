@@ -42,6 +42,7 @@ func New() (*Server, error) {
 		users:            db.Collection("users"),
 		sessions:         db.Collection("sessions"),
 		code_submissions: db.Collection("code_submissions"),
+		tasks:            db.Collection("tasks"),
 		staticDir:        staticDir,
 		devMode:          devMode,
 		rateByIP:         make(map[string][]time.Time),

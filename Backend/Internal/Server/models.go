@@ -46,3 +46,12 @@ type RunResp struct {
 	Stderr   string `json:"stderr"`
 	ExitCode int    `json:"exitCode"`
 }
+
+type Task struct {
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Title       string             `bson:"title" json:"title"`
+	Tag         string             `bson:"tag" json:"tag"`
+	Description string             `bson:"description" json:"description"`
+	StarterCode string             `bson:"starterCode" json:"starterCode"`
+	CreatedAt   time.Time          `bson:"createdAt" json:"createdAt"`
+}
