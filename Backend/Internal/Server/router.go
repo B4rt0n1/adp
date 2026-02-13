@@ -21,14 +21,17 @@ func (s *Server) setupRouter() {
 		api.Put("/update-profile", s.withSecurity(s.requireAuth(s.handleUpdateProfile)))
 		api.Patch("/upload-photo", s.withSecurity(s.requireAuth(s.handleUploadPhoto)))
 		api.Post("/save-code", s.withSecurity(s.requireAuth(s.handleSaveCode)))
-		api.Post("/run-code", s.withSecurity(s.requireAuth(runHandler)))
-		api.Get("/tasks", s.withSecurity(s.requireAuth(s.handleListTasks)))
+		api.Post("/run-code", s.withSecurity(s.requireAuth(s.handleRunAndCheck)))
+		api.Get("/tasks", s.withSecurity(s.handleGetLearningPath))
+		api.Get("/learning-path", s.withSecurity(s.handleGetLearningPath))
+		api.Get("/tasks/{id}", s.withSecurity(s.handleGetTask))
 		api.Route("/admin", func(admin chi.Router) {
 			admin.Get("/users", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminListUsers))))
 			admin.Put("/users/{id}", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminUpdateUser))))
 			admin.Delete("/users/{id}", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminDeleteUser))))
 			admin.Post("/tasks", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminCreateTask))))
 			admin.Delete("/tasks/{id}", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminDeleteTask))))
+			admin.Put("/tasks/{id}", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminUpdateTask))))
 		})
 	})
 
@@ -44,6 +47,7 @@ func (s *Server) setupRouter() {
 	r.Get("/go", s.serveFile("go.html"))
 	r.Get("/about", s.serveFile("about.html"))
 	r.Get("/profile", s.serveFile("profile.html"))
+	r.Get("/task/{id}", s.withSecurity(s.serveFile("editor.html")))
 
 	r.Handle("/Profile-Images/*",
 		http.StripPrefix("/Profile-Images/",

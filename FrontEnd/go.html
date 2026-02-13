@@ -6,50 +6,101 @@
     <title>Go Practice - GoEdu</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-        body {
-            display: none;
+        .tasks-section {
+            padding: 20px 0;
         }
 
-        .task-list {
+        .track-section {
+            margin-bottom: 40px;
+        }
+
+        .track-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #fff;
+            padding-left: 20px;
+            border-left: 4px solid #007bff;
+        }
+
+        .track-slider {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 10px 20px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #1f1f1f;
+        }
+
+        .track-slider::-webkit-scrollbar {
+            height: 8px;
+        }
+        .track-slider::-webkit-scrollbar-track {
+            background: #1f1f1f;
+        }
+        .track-slider::-webkit-scrollbar-thumb {
+            background-color: #444;
+            border-radius: 4px;
+        }
+
+        .task-card {
+            min-width: 260px;
+            height: 160px;
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            justify-content: space-between;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            text-decoration: none;
         }
-        .task-item {
-            background: #fff;
-            padding: 20px;
-            border-left: 4px solid #1f1f1f;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            border-color: #007bff;
+            background: #333;
         }
-        .task-item h3 {
-            margin-bottom: 10px;
-            color: #1f1f1f;
-        }
-        .code-box {
-            background: #282c34;
-            color: #abb2bf;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin: 10px 0;
-            position: relative;
-        }
-        .hint {
-            font-size: 0.85rem;
-            color: #666;
-            font-style: italic;
-        }
-        .tag {
-            background: #eee;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
+
+        .task-title {
             font-weight: bold;
+            font-size: 1.1rem;
+            color: #fff;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
+
+        .task-status {
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-card.locked {
+            opacity: 0.6;
+            pointer-events: none;
+            border-style: dashed;
+            background: #222;
+        }
+        .task-card.locked .task-status { color: #888; }
+
+        .task-card.completed {
+            border-color: #28a745;
+            background: #1e2e22;
+        }
+        .task-card.completed .task-status { color: #4ade80; }
+
+        .task-card.active {
+            border-color: #007bff;
+        }
+        .task-card.active .task-status { color: #61dafb; }
+
     </style>
 </head>
 <body>
@@ -70,38 +121,18 @@
     </header>
 
     <div class="content-wrapper">
-        <aside class="sidebar">
-        </aside>
-
         <main class="main-content">
-    <section id="syntax-ref">
-        <h2>Go Practice Arena</h2>
-        <p>Select a task from the list below to start coding.</p>
-    </section>
+            <section id="intro">
+                <h2>Go Practice Arena</h2>
+                <p>Select a learning track and start coding tasks to improve your Go skills.</p>
+            </section>
 
-    <section class="tasks-section">
-        <h2>Available Tasks</h2>
-        <div class="task-list" id="taskContainer">
-            <p>Loading tasks...</p>
-        </div>
-    </section>
-
-    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ccc;">
-
-    <div class="code-editor">
-        <h3>Code Editor</h3>
-        <textarea class="code-input" id="codeInput" placeholder="Select a task above and click 'Solve' to load code here..."></textarea>
-        <div style="margin-top: 10px;">
-            <button id="saveCode" class="primary-btn">Save Code</button>
-            <button id="run" class="primary-btn">Run Code</button>
-            <button id="reset" class="secondary-btn">Reset</button>
-        </div>
-        <div class="code-output">
-            <h3>Output:</h3>
-            <pre id="outputArea"></pre>
-        </div>
-    </div>
-</main>
+            <section class="tasks-section">
+                <div id="learning-tracks">
+                    <p style="padding: 20px; color: #888;">Loading tasks...</p>
+                </div>
+            </section>
+        </main>
     </div>
 
     <footer class="site-footer">
@@ -110,143 +141,90 @@
 
 <script src="main.js"></script>
 <script>
-async function loadTasksFromDB() {
-    const container = document.getElementById('taskContainer');
-    try {
-        const res = await fetch("/api/tasks", { credentials: "same-origin" });
-        if (!res.ok) throw new Error("Failed");
-        
-        const tasks = await res.json();
+    async function loadTasks() {
+        try {
+            const response = await fetch('/api/tasks');
+            if (!response.ok) throw new Error("Failed to load tasks");
+            
+            const tasks = await response.json();
 
-        if (tasks.length === 0) {
-            container.innerHTML = "<p>No tasks yet.</p>";
-            return;
+            const branches = {};
+            
+            tasks.forEach(task => {
+                const tag = task.tag || "General";
+                if (!branches[tag]) {
+                    branches[tag] = [];
+                }
+                branches[tag].push(task);
+            });
+
+            const container = document.getElementById('learning-tracks');
+            container.innerHTML = ''; 
+
+            if (Object.keys(branches).length === 0) {
+                container.innerHTML = '<p style="padding: 20px;">No tasks available yet.</p>';
+                return;
+            }
+
+            Object.keys(branches).forEach(tagName => {
+                const tasksInBranch = branches[tagName];
+                
+                tasksInBranch.sort((a, b) => a.order - b.order);
+
+                const section = document.createElement('div');
+                section.className = 'track-section';
+
+                const title = document.createElement('h2');
+                title.className = 'track-title';
+                title.textContent = tagName;
+
+                const slider = document.createElement('div');
+                slider.className = 'track-slider';
+
+                tasksInBranch.forEach(task => {
+                    const card = document.createElement('div');
+                    
+                    let statusClass = 'active';
+                    let statusText = 'Start';
+                    
+                    if (task.isLocked) {
+                        statusClass = 'locked';
+                        statusText = 'Locked';
+                    }
+                    if (task.isCompleted) {
+                        statusClass = 'completed';
+                        statusText = 'Completed';
+                    }
+                    
+                    card.className = `task-card ${statusClass}`;
+                    
+                    card.innerHTML = `
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-status">${statusText}</div>
+                    `;
+
+                    if (!task.isLocked) {
+                        card.onclick = () => {
+                            window.location.href = `/task/${task.id}`;
+                        };
+                    }
+
+                    slider.appendChild(card);
+                });
+
+                section.appendChild(title);
+                section.appendChild(slider);
+                container.appendChild(section);
+            });
+
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById('learning-tracks').innerHTML = 
+                '<div style="padding: 20px; color: #ff6b6b;">Please log in to view tasks.</div>';
         }
-
-        container.innerHTML = tasks.map((task, index) => `
-            <article class="task-item" style="margin-bottom: 15px; border-left: 4px solid #007d9c;">
-                <div style="display:flex; justify-content:space-between;">
-                    <h3>${index + 1}. ${task.title} <small class="tag">${task.tag}</small></h3>
-                </div>
-                <p>${task.description}</p>
-                <button onclick="applyCode(\`${task.starterCode.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)" 
-                        style="background:#007d9c; color:white; border:none; padding:5px 10px; cursor:pointer; margin-top:5px;">
-                    Solve Task
-                </button>
-            </article>
-        `).join('');
-
-    } catch (e) {
-        console.error(e);
-        container.innerHTML = "Error loading tasks.";
-    }
-}
-
-function applyCode(code) {
-    const editor = document.querySelector('.code-input');
-    editor.value = code;
-    editor.scrollIntoView({ behavior: 'smooth' });
-    editor.style.height = "auto";
-    editor.style.height = editor.scrollHeight + "px";
-}
-document.addEventListener('DOMContentLoaded', loadTasksFromDB);
-
-
-blockIfNotAuth();
-loadSavedCode();
-
-const codeInput = document.querySelector('.code-input');
-const saveButton = document.getElementById("saveCode");
-const resetButton = document.getElementById("reset");
-const outputArea = document.getElementById("outputArea");
-const runButton = document.getElementById("run");
-
-codeInput.addEventListener('input', () => autoResize(codeInput));
-
-saveButton.addEventListener("click", async () => {
-    const userCode = codeInput.value.trim();
-    if (!userCode) {
-        alert("Please enter your code before submitting.");
-        return;
     }
 
-
-    try {
-        const res = await fetch("/api/save-code", {
-            method: "POST",
-            credentials: "same-origin",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userID: window.userID, lessonID: "1", code: userCode })
-        });
-
-        if (!res.ok) {
-            throw new Error("Failed to submit code");
-        }
-
-        alert("Code submitted successfully");
-    } catch (e){
-        console.error(e);
-        alert("Failed to submit code.")
-    }
-}); 
-
-runButton.addEventListener("click", async () => {
-    const userCode = codeInput.value.trim();
-    if (!userCode) {
-        alert("Please enter your code before running.");
-        return;
-    }
-
-    try {
-        const res = await fetch("/api/run-code", {
-            method: "POST",
-            credentials: "same-origin",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userID: window.userID, lessonID: "1", code: userCode })
-        });
-
-        if (!res.ok) {
-            throw new Error("Failed to run code");
-        }
-
-        const data = await res.json();
-        outputArea.textContent =
-        (data.stdout || "") +
-        (data.stderr ? "\n" + data.stderr : "");
-    } catch (e) {
-        console.error(e);
-        alert("Failed to run code.");
-    }
-});
-
-resetButton.addEventListener("click", () => {
-    codeInput.value = "";
-    codeInput.style.height = "auto";
-});
-
-async function loadSavedCode() {
-    const lessonId = "1";
-    try {
-        const res = await fetch(`/savedCode?lessonId=${lessonId}`, { credentials: "same-origin" })
-
-        if (!res.ok) {
-            throw new Error("Failed to load saved code");
-        }
-
-        const data = await res.json();
-        codeInput.value = data.code || "";
-        autoResize(codeInput);
-
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-function autoResize(el) {
-  el.style.height = "auto";
-  el.style.height = el.scrollHeight + "px";
-}
-
+    document.addEventListener('DOMContentLoaded', loadTasks);
 </script>
 
 </body>

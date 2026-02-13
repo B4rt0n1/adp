@@ -2,257 +2,512 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel - GoEdu</title>
+<title>Admin Dashboard - GoEdu</title>
 <link rel="stylesheet" href="/style.css">
 
 <style>
-.admin-section {
-  background:#fff;
-  padding:20px;
-  margin-bottom:2rem;
-  border-radius:4px;
-  box-shadow:0 2px 5px rgba(0,0,0,.05);
-}
+    body {
+        background-color: #f4f6f9;
+        color: #333333;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
 
-table {
-  width:100%;
-  border-collapse:collapse;
-}
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
 
-th, td {
-  padding:10px;
-  border-bottom:1px solid #eee;
-}
+    .admin-section {
+        background: #ffffff;
+        padding: 30px;
+        margin-bottom: 30px;
+        border-radius: 12px;
+        border: 1px solid #e1e4e8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
 
-th { background:#f5f5f5; }
+    h2 {
+        color: #1a1a1a;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 15px;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
 
-.tag {
-  padding:2px 8px;
-  border-radius:12px;
-  font-size:.75rem;
-  font-weight:bold;
-}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 0.95rem;
+    }
 
-.tag.admin {
-  background:#000;
-  color:#fff;
-}
+    th {
+        background: #f8f9fa;
+        color: #5f6368;
+        font-weight: 600;
+        text-align: left;
+        padding: 15px;
+        border-bottom: 2px solid #dee2e6;
+    }
 
-.action-btn {
-  padding:6px 10px;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-  background:#000;
-  color:#fff;
-}
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        color: #333;
+        vertical-align: middle;
+    }
 
-.action-btn.danger { background:#b00020; }
+    tr:hover {
+        background-color: #f8f9fa;
+    }
 
-#editModal {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-}
+    .tag {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        background: #e8f0fe;
+        color: #1967d2;
+        border: 1px solid #d2e3fc;
+    }
 
-#editBox {
-  background:#fff;
-  width:300px;
-  margin:10% auto;
-  padding:20px;
-  border-radius:6px;
-}
+    .tag.admin {
+        background: #f3e8fd;
+        color: #8430ce;
+        border: 1px solid #e9d2fd;
+    }
+
+    .action-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        margin-right: 8px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .action-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+    .action-btn.edit { background: #fff; border: 1px solid #007bff; color: #007bff; }
+    .action-btn.edit:hover { background: #007bff; color: #fff; }
+
+    .action-btn.danger { background: #fff; border: 1px solid #dc3545; color: #dc3545; }
+    .action-btn.danger:hover { background: #dc3545; color: #fff; }
+
+    .primary-btn {
+        background: #28a745;
+        color: #fff;
+        font-weight: bold;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 15px;
+        font-size: 1rem;
+        transition: background 0.2s;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+    }
+    .primary-btn:hover { background: #218838; }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-top: 20px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        background-color: #fff;
+        color: #333;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-family: inherit;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    }
+
+    textarea.code-input {
+        font-family: 'Consolas', 'Monaco', monospace;
+        background-color: #282c34;
+        color: #abb2bf;
+        border: 1px solid #ced4da;
+    }
+
+    #editModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        backdrop-filter: blur(2px);
+    }
+
+    #editBox {
+        background: #fff;
+        width: 400px;
+        margin: 10vh auto;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    #cancelEditBtn {
+        background: #6c757d;
+        color: white;
+        border: none;
+    }
+    #cancelEditBtn:hover { background: #5a6268; }
+
+    .site-header {
+        background: #fff;
+        border-bottom: 1px solid #eaeaea;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .site-header a { color: #333 !important; }
+    .site-header .logo { color: #000 !important; font-weight: 900; }
 </style>
 </head>
 
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="/" class="logo">GoEdu</a>
+            <a href="/" class="logo">GoEdu <span style="font-size: 0.8em; color: #666; font-weight: normal;">Admin</span></a>
 
             <nav class="main-nav" id="mainNav">
                 <a href="/">Home</a>
                 <a href="/handbooks">Handbooks</a>
                 <a href="/go">Go</a>
                 <a href="/about">About</a>
-                <a href="/admin" class="admin-nav" style="display: none;">Admin</a>
+                <a href="/admin" class="admin-nav">Admin</a>
             </nav>
 
             <a href="/profile" class="profile-img"><img src="Profile-Images/default.jpg" alt="img" class="profile-img"></a>
         </div>
    </header>
 
-<h2 style="padding:20px">Admin Panel — User Management</h2>
-
-<div class="admin-section">
-    <div class="auth-card">
-        <h2>Create New Task (Go Entity)</h2>
-        <div class="auth-form">
-            <label for="taskTitle">
-                Task Title
-                <input type="text" id="taskTitle" placeholder="e.g., Variable Basics">
-            </label>
-
-            <label for="taskTag">
-                Category Tag
-                <input type="text" id="taskTag" placeholder="e.g., Syntax">
-            </label>
-            
-            <label for="taskDesc">
-                Task Description
-                <textarea id="taskDesc" class="code-input" placeholder="Describe what needs to be done..." style="height: 100px; resize: vertical;"></textarea>
-            </label>
-            
-            <label for="taskCode">
-                Starter Code (Go)
-                <textarea id="taskCode" class="code-input" placeholder="package main..." 
-                    style="height: 150px; font-family: 'Consolas', monospace; background: #282c34; color: #abb2bf; resize: vertical;"></textarea>
-            </label>
-            
-            <button class="primary-btn" onclick="submitNewTask()" style="margin-top: 10px;">Add to Database</button>
+<div class="admin-container">
+    
+    <div class="admin-section">
+        <div class="form-header">
+            <h2 id="formTitle" style="border:none; margin:0;">Create New Task</h2>
+            <button id="cancelEditBtn" class="action-btn" style="display: none;" onclick="resetTaskForm()">Cancel Edit</button>
         </div>
+        <p style="color: #666; margin-bottom: 20px;">Use this form to add new challenges to the learning path or edit existing ones.</p>
+        
+        <div class="auth-form">
+            <input type="hidden" id="taskId">
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <label style="margin-top: 0;">
+                    Task Title
+                    <input type="text" id="taskTitle" placeholder="Ex: Structs and Interfaces">
+                </label>
+                <label style="margin-top: 0;">
+                    Category Tag (Branch)
+                    <input type="text" id="taskTag" placeholder="Ex: Advanced">
+                </label>
+            </div>
+            
+            <label>
+                Description
+                <textarea id="taskDesc" rows="2" placeholder="Briefly describe the challenge..."></textarea>
+            </label>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <label>
+                    Tree Order (Index)
+                    <input type="number" id="taskOrder" value="1">
+                </label>
+                <label>
+                    Expected Output (Exact Match)
+                    <textarea id="expectedOutput" class="code-input" style="height: 42px; background: #f8f9fa; color: #333; border-color: #ddd;" placeholder="Output..."></textarea>
+                </label>
+            </div>
+            
+            <label>
+                Starter Code (Go Template)
+                <textarea id="taskCode" class="code-input" placeholder="package main..." 
+                    style="height: 150px;"></textarea>
+            </label>
+            
+            <button class="primary-btn" id="saveTaskBtn" onclick="saveTask()">Create & Publish Task</button>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <h2 style="margin-bottom: 5px;">Learning Path Tasks</h2>
+        <p style="color: #666; margin-bottom: 20px; font-size: 0.9em;">Manage all available coding exercises.</p>
+        
+        <table id="tasksTable">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">#</th>
+                    <th>Tag</th>
+                    <th>Title</th>
+                    <th style="width: 180px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="4" style="text-align: center; color: #666; padding: 30px;">Loading tasks...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="admin-section">
+        <h2>User Management</h2>
+        <table id="usersTable">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+        </table>
     </div>
 </div>
 
-<section class="admin-section">
-<table id="usersTable">
-<thead>
-<tr>
-  <th>Name</th>
-  <th>Email</th>
-  <th>Role</th>
-  <th>Created</th>
-  <th>Actions</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</section>
-
 <div id="editModal">
   <div id="editBox">
-    <h3>Edit User</h3>
-    <input type="hidden" id="editId">
+    <h3 style="color: #333; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Edit User</h3>
+    <input type="hidden" id="editUserId">
 
     <label>Name</label>
-    <input id="editName" style="width:100%">
+    <input id="editUserName">
 
     <label>Role</label>
-    <select id="editRole" style="width:100%">
+    <select id="editUserRole">
       <option value="user">User</option>
       <option value="admin">Admin</option>
     </select>
 
-    <br><br>
-    <button class="action-btn" onclick="saveUser()">Save</button>
-    <button class="action-btn danger" onclick="closeModal()">Cancel</button>
+    <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="action-btn" style="background: #f1f3f5; color: #333; border: 1px solid #ddd;" onclick="closeModal()">Cancel</button>
+        <button class="action-btn" style="background: #007bff; color: white; border: none;" onclick="saveUser()">Save Changes</button>
+    </div>
   </div>
-  
 </div>
 
 <script src="/main.js"></script>
 <script>
-async function loadUsers() {
-  const res = await fetch("/api/admin/users", { credentials:"same-origin" });
-  const users = await res.json();
+    let allTasks = [];
 
-  const tbody = document.querySelector("#usersTable tbody");
-  tbody.innerHTML = "";
-
-  users.forEach(u => {
-    tbody.innerHTML += `
-    <tr>
-      <td>${u.name}</td>
-      <td>${u.email}</td>
-      <td><span class="tag ${u.role==="admin"?"admin":""}">${u.role}</span></td>
-      <td>${new Date(u.createdAt).toISOString().split("T")[0]}</td>
-      <td>
-        <button class="action-btn" onclick="openEdit('${u.id}','${u.name}','${u.role}')">Edit</button>
-        <button class="action-btn danger" onclick="deleteUser('${u.id}')">Delete</button>
-      </td>
-    </tr>`;
-  });
-}
-
-function openEdit(id,name,role){
-  editId.value=id;
-  editName.value=name;
-  editRole.value=role;
-  editModal.style.display="block";
-}
-
-function closeModal(){
-  editModal.style.display="none";
-}
-
-async function saveUser(){
-  await fetch("/api/admin/users/"+editId.value,{
-    method:"PUT",
-    credentials:"same-origin",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      name:editName.value,
-      role:editRole.value
-    })
-  });
-  closeModal();
-  loadUsers();
-}
-
-async function deleteUser(id){
-  if(!confirm("Delete user?")) return;
-  await fetch("/api/admin/users/"+id,{
-    method:"DELETE",
-    credentials:"same-origin"
-  });
-  loadUsers();
-}
-
-loadUsers();
-
-async function submitNewTask() {
-    const title = document.getElementById('taskTitle').value;
-    const tag = document.getElementById('taskTag').value;
-    const description = document.getElementById('taskDesc').value;
-    const starterCode = document.getElementById('taskCode').value;
-    if (!title || !description) {
-        alert("Title and description are required!");
-        return;
-    }
-
-    const payload = {
-        title: title,
-        tag: tag,
-        description: description,
-        starterCode: starterCode
-    };
-
-    try {
-        const res = await fetch("/api/admin/tasks", {
-            method: "POST",
-            credentials: "same-origin",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-            alert("Task created successfully!");
-            document.getElementById('taskTitle').value = "";
-            document.getElementById('taskTag').value = "";
-            document.getElementById('taskDesc').value = "";
-            document.getElementById('taskCode').value = "";
-        } else {
-            const errText = await res.text();
-            alert("Server error: " + errText);
+    async function loadTasks() {
+        try {
+            const res = await fetch("/api/tasks", { credentials: "same-origin" });
+            allTasks = await res.json();
+            renderTasksTable();
+        } catch (e) {
+            console.error("Error loading tasks:", e);
         }
-    } catch (e) {
-        console.error(e);
-        alert("Failed to send request.");
     }
-}
+
+    function renderTasksTable() {
+        const tbody = document.querySelector("#tasksTable tbody");
+        tbody.innerHTML = "";
+        
+        allTasks.sort((a, b) => a.order - b.order);
+
+        if (allTasks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: #777;">No tasks found. Create one above!</td></tr>';
+            return;
+        }
+
+        allTasks.forEach(t => {
+            tbody.innerHTML += `
+            <tr>
+                <td><span style="color: #777; font-weight: bold;">${t.order}</span></td>
+                <td><span class="tag">${t.tag || 'General'}</span></td>
+                <td><strong style="color: #333;">${t.title}</strong></td>
+                <td style="text-align: right;">
+                    <button class="action-btn edit" onclick="startEditTask('${t.id}')">Edit</button>
+                    <button class="action-btn danger" onclick="deleteTask('${t.id}')">Delete</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function startEditTask(id) {
+        const task = allTasks.find(t => t.id === id);
+        if (!task) return;
+
+        document.getElementById('taskId').value = task.id;
+        document.getElementById('taskTitle').value = task.title;
+        document.getElementById('taskTag').value = task.tag || '';
+        document.getElementById('taskDesc').value = task.description;
+        document.getElementById('taskOrder').value = task.order;
+        document.getElementById('expectedOutput').value = task.expectedOutput;
+        document.getElementById('taskCode').value = task.starterCode;
+
+        document.getElementById('formTitle').innerText = "Edit Task";
+        const btn = document.getElementById('saveTaskBtn');
+        btn.innerText = "Update Task";
+        btn.style.background = "#007bff";
+        
+        document.getElementById('cancelEditBtn').style.display = "block";
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetTaskForm() {
+        document.getElementById('taskId').value = "";
+        document.getElementById('taskTitle').value = "";
+        document.getElementById('taskTag').value = "";
+        document.getElementById('taskDesc').value = "";
+        document.getElementById('taskOrder').value = "1";
+        document.getElementById('expectedOutput').value = "";
+        document.getElementById('taskCode').value = "";
+
+        document.getElementById('formTitle').innerText = "Create New Task";
+        const btn = document.getElementById('saveTaskBtn');
+        btn.innerText = "Create & Publish Task";
+        btn.style.background = "";
+        
+        document.getElementById('cancelEditBtn').style.display = "none";
+    }
+
+    async function saveTask() {
+        const id = document.getElementById('taskId').value;
+        
+        const taskData = {
+            title: document.getElementById('taskTitle').value,
+            tag: document.getElementById('taskTag').value,
+            description: document.getElementById('taskDesc').value,
+            order: parseInt(document.getElementById('taskOrder').value) || 0,
+            expectedOutput: document.getElementById('expectedOutput').value.trim(),
+            starterCode: document.getElementById('taskCode').value
+        };
+
+        if (!taskData.title || !taskData.expectedOutput) {
+            alert("Title and Expected Output are required.");
+            return;
+        }
+
+        const method = id ? "PUT" : "POST";
+        const url = id ? `/api/admin/tasks/${id}` : "/api/admin/tasks";
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(taskData),
+                credentials: "same-origin"
+            });
+
+            if (res.ok) {
+                resetTaskForm();
+                loadTasks();
+            } else {
+                alert("Error saving task");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Connection error");
+        }
+    }
+
+    async function deleteTask(id) {
+        if (!confirm("Delete this task permanently?")) return;
+
+        try {
+            const res = await fetch(`/api/admin/tasks/${id}`, {
+                method: "DELETE",
+                credentials: "same-origin"
+            });
+            if (res.ok) loadTasks();
+        } catch (e) { console.error(e); }
+    }
+
+    async function loadUsers() {
+        try {
+            const res = await fetch("/api/admin/users", { credentials:"same-origin" });
+            const users = await res.json();
+
+            const tbody = document.querySelector("#usersTable tbody");
+            tbody.innerHTML = "";
+
+            users.forEach(u => {
+                tbody.innerHTML += `
+                <tr>
+                <td><strong style="color:#333;">${u.name}</strong></td>
+                <td>${u.email}</td>
+                <td><span class="tag ${u.role==="admin"?"admin":""}">${u.role}</span></td>
+                <td>${new Date(u.createdAt).toISOString().split("T")[0]}</td>
+                <td style="text-align: right;">
+                    <button class="action-btn edit" onclick="openUserEdit('${u.id}','${u.name}','${u.role}')">Edit</button>
+                    <button class="action-btn danger" onclick="deleteUser('${u.id}')">Delete</button>
+                </td>
+                </tr>`;
+            });
+        } catch (e) { console.error("Error loading users", e); }
+    }
+
+    const editModal = document.getElementById('editModal');
+    const editUserId = document.getElementById('editUserId');
+    const editUserName = document.getElementById('editUserName');
+    const editUserRole = document.getElementById('editUserRole');
+
+    function openUserEdit(id,name,role){
+        editUserId.value=id;
+        editUserName.value=name;
+        editUserRole.value=role;
+        editModal.style.display="block";
+    }
+
+    function closeModal(){
+        editModal.style.display="none";
+    }
+
+    async function saveUser(){
+        await fetch("/api/admin/users/"+editUserId.value,{
+            method:"PUT",
+            credentials:"same-origin",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({
+                name:editUserName.value,
+                role:editUserRole.value
+            })
+        });
+        closeModal();
+        loadUsers();
+    }
+
+    async function deleteUser(id){
+        if(!confirm("Delete user?")) return;
+        await fetch("/api/admin/users/"+id,{ method:"DELETE", credentials:"same-origin" });
+        loadUsers();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTasks();
+        loadUsers();
+    });
 
 </script>
-
 </body>
 </html>

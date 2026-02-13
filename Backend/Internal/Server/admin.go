@@ -129,3 +129,38 @@ func (s *Server) handleAdminDeleteTask(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (s *Server) handleAdminUpdateTask(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := primitive.ObjectIDFromHex(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", 400)
+		return
+	}
+
+	var req Task
+	if err := decodeJSON(r, &req); err != nil {
+		http.Error(w, "Invalid JSON", 400)
+		return
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"title":          req.Title,
+			"tag":            req.Tag,
+			"description":    req.Description,
+			"starterCode":    req.StarterCode,
+			"order":          req.Order,
+			"expectedOutput": req.ExpectedOutput,
+		},
+	}
+
+	_, err = s.tasks.UpdateOne(r.Context(), bson.M{"_id": id}, update)
+	if err != nil {
+		http.Error(w, "Update failed", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	writeJSON(w, http.StatusOK, map[string]string{"status": "updated"})
+}

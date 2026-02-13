@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Code Editor - GoEdu</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #121212; }
+        
+        .ide-header {
+            height: 50px; background: #1f1f1f; border-bottom: 1px solid #333;
+            display: flex; align-items: center; padding: 0 20px; justify-content: space-between;
+        }
+
+        .ide-container {
+            display: flex; flex: 1; height: calc(100vh - 50px);
+        }
+
+        .task-panel {
+            width: 35%; background: #1e1e1e; border-right: 1px solid #333;
+            padding: 20px; color: #d4d4d4; overflow-y: auto;
+        }
+
+        .editor-panel {
+            width: 65%; display: flex; flex-direction: column; background: #121212;
+        }
+
+        .code-area {
+            flex: 1; background: #1e1e1e; color: #abb2bf;
+            font-family: 'Consolas', monospace; font-size: 16px;
+            border: none; padding: 20px; resize: none; outline: none;
+            line-height: 1.5;
+        }
+
+        .output-area {
+            height: 30%; background: #121212; border-top: 1px solid #333;
+            padding: 15px; color: #fff; font-family: monospace; overflow-y: auto;
+        }
+
+        .toolbar {
+            padding: 10px; background: #252526; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #333;
+        }
+
+        .back-link { color: #888; text-decoration: none; font-size: 0.9rem; }
+        .back-link:hover { color: #fff; }
+
+        h1 { font-size: 1.2rem; margin: 0 0 10px 0; color: #fff; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #333; font-size: 0.75rem; margin-bottom: 15px; color: #81a1c1;}
+    </style>
+</head>
+<body>
+
+    <div class="ide-header">
+        <a href="/go" class="back-link">← Back to Tasks</a>
+        <div id="taskStatus" style="color: #666; font-size: 0.9rem;">Loading...</div>
+    </div>
+
+    <div class="ide-container">
+        <div class="task-panel">
+            <span id="displayTag" class="tag">Category</span>
+            <h1 id="displayTitle">Task Title</h1>
+            <p id="displayDesc" style="line-height: 1.6; color: #ccc;">Loading description...</p>
+            
+            <div style="margin-top: 30px; background: #252526; padding: 10px; border-radius: 4px;">
+                <strong style="color: #888; font-size: 0.8rem;">EXPECTED OUTPUT:</strong>
+                <pre id="displayOutput" style="margin: 5px 0 0; color: #a3be8c;"></pre>
+            </div>
+        </div>
+
+        <div class="editor-panel">
+            <textarea id="codeInput" class="code-input code-area" spellcheck="false"></textarea>
+            
+            <div class="toolbar">
+                <button class="secondary-btn" onclick="resetCode()" style="padding: 6px 15px;">Reset</button>
+                <button class="primary-btn" onclick="runCode()" style="padding: 6px 20px; background: #4caf50; color: white; border:none; border-radius: 4px; cursor: pointer;">Run & Check ▶</button>
+            </div>
+
+            <div class="output-area" id="consoleOutput">
+                <span style="color: #666;">// Output will appear here...</span>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const pathParts = window.location.pathname.split('/');
+    const taskID = pathParts[pathParts.length - 1];
+
+    let starterCode = "";
+
+    async function loadTaskData() {
+        try {
+            const res = await fetch(`/api/tasks/${taskID}`);
+            if (!res.ok) throw new Error("Task not found");
+
+            const task = await res.json();
+
+            document.title = `${task.title} - GoEdu`;
+            document.getElementById('displayTitle').innerText = task.title;
+            document.getElementById('displayDesc').innerText = task.description;
+            document.getElementById('displayTag').innerText = task.tag || "Go";
+            document.getElementById('displayOutput').innerText = task.expectedOutput;
+
+            const statusEl = document.getElementById('taskStatus');
+            if (task.isCompleted) {
+                statusEl.innerHTML = '<span style="color: #4ade80">Solved</span>';
+            } else {
+                statusEl.innerHTML = '<span style="color: #aaa">Unsolved</span>';
+            }
+
+            starterCode = task.starterCode;
+            loadSavedCode(task.id);
+
+        } catch (e) {
+            alert("Error loading task: " + e.message);
+            window.location.href = '/go';
+        }
+    }
+
+    async function loadSavedCode(lessonId) {
+        try {
+            const res = await fetch(`/savedCode?lessonId=${lessonId}`);
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('codeInput').value = data.code || starterCode;
+            } else {
+                document.getElementById('codeInput').value = starterCode;
+            }
+        } catch {
+            document.getElementById('codeInput').value = starterCode;
+        }
+    }
+
+    function resetCode() {
+        if(confirm("Reset to starter code?")) {
+            document.getElementById('codeInput').value = starterCode;
+        }
+    }
+
+    async function runCode() {
+        const code = document.getElementById('codeInput').value;
+        const outputDiv = document.getElementById('consoleOutput');
+        
+        outputDiv.innerHTML = '<span style="color: yellow">Compiling and running container...</span>';
+
+        await fetch("/api/save-code", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lessonID: taskID, code: code })
+        });
+
+        try {
+            const res = await fetch("/api/run-code", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ lessonID: taskID, code: code })
+            });
+
+            const result = await res.json();
+
+            let html = "";
+            if (result.stdout) html += `<div>${result.stdout}</div>`;
+            if (result.stderr) html += `<div style="color: #ff6b6b">${result.stderr}</div>`;
+            
+            if (result.isCorrect) {
+                html += `<div style="margin-top: 10px; color: #4ade80; font-weight: bold;">✨ SUCCESS! Task Completed.</div>`;
+                document.getElementById('taskStatus').innerHTML = '<span style="color: #4ade80"> Solved</span>';
+            } else if (result.exitCode !== 0) {
+                html += `<div style="margin-top: 10px; color: #ff6b6b; font-weight: bold;"> Runtime Error (Exit: ${result.exitCode})</div>`;
+            } else {
+                html += `<div style="margin-top: 10px; color: #fbbf24; font-weight: bold;"> Output Mismatch. Check expected output.</div>`;
+            }
+
+            outputDiv.innerHTML = html;
+
+        } catch (e) {
+            outputDiv.innerText = "Error connecting to server.";
+        }
+    }
+
+    document.getElementById('codeInput').addEventListener('keydown', function(e) {
+        if (e.key == 'Tab') {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 1;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadTaskData);
+</script>
+
+</body>
+</html>

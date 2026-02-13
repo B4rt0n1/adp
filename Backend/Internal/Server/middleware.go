@@ -13,6 +13,8 @@ import (
 
 type ctxUserKey struct{}
 
+type ctxKeyUserID struct{}
+
 func (s *Server) withSecurity(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -143,4 +145,9 @@ func (s *Server) authenticate(r *http.Request) (userDoc, error) {
 	}
 
 	return u, nil
+}
+
+func UserFromContext(ctx context.Context) (userDoc, bool) {
+	u, ok := ctx.Value(ctxUserKey{}).(userDoc)
+	return u, ok
 }
