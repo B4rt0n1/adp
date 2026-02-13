@@ -22,9 +22,9 @@ func (s *Server) setupRouter() {
 		api.Patch("/upload-photo", s.withSecurity(s.requireAuth(s.handleUploadPhoto)))
 		api.Post("/save-code", s.withSecurity(s.requireAuth(s.handleSaveCode)))
 		api.Post("/run-code", s.withSecurity(s.requireAuth(s.handleRunAndCheck)))
-		api.Get("/tasks", s.withSecurity(s.handleGetLearningPath))
+		api.Get("/tasks", s.withSecurity(s.requireAuth(s.handleGetLearningPath)))
 		api.Get("/learning-path", s.withSecurity(s.handleGetLearningPath))
-		api.Get("/tasks/{id}", s.withSecurity(s.handleGetTask))
+		api.Get("/tasks/{id}", s.withSecurity(s.requireAuth(s.handleGetTask)))
 		api.Route("/admin", func(admin chi.Router) {
 			admin.Get("/users", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminListUsers))))
 			admin.Put("/users/{id}", s.withSecurity(s.requireAuth(s.requireAdmin(s.handleAdminUpdateUser))))

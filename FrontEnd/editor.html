@@ -84,12 +84,12 @@
 <script>
     const pathParts = window.location.pathname.split('/');
     const taskID = pathParts[pathParts.length - 1];
-
     let starterCode = "";
+    
 
     async function loadTaskData() {
         try {
-            const res = await fetch(`/api/tasks/${taskID}`);
+            const res = await fetch(`/api/tasks/${taskID}`, { credentials: 'include' });
             if (!res.ok) throw new Error("Task not found");
 
             const task = await res.json();
@@ -101,6 +101,7 @@
             document.getElementById('displayOutput').innerText = task.expectedOutput;
 
             const statusEl = document.getElementById('taskStatus');
+            console.log(task.isCompleted);
             if (task.isCompleted) {
                 statusEl.innerHTML = '<span style="color: #4ade80">Solved</span>';
             } else {
@@ -108,7 +109,8 @@
             }
 
             starterCode = task.starterCode;
-            loadSavedCode(task.id);
+            loadSavedCode(taskID);
+            console.log(task.id)
 
         } catch (e) {
             alert("Error loading task: " + e.message);
@@ -116,19 +118,25 @@
         }
     }
 
-    async function loadSavedCode(lessonId) {
-        try {
-            const res = await fetch(`/savedCode?lessonId=${lessonId}`);
-            if (res.ok) {
-                const data = await res.json();
-                document.getElementById('codeInput').value = data.code || starterCode;
-            } else {
-                document.getElementById('codeInput').value = starterCode;
-            }
-        } catch {
-            document.getElementById('codeInput').value = starterCode;
-        }
+async function loadSavedCode(taskID) {
+  try {
+    const res = await fetch(`/savedCode?lessonId=${taskID}`, { credentials: 'include' });
+
+    if (!res.ok) {
+      console.log("loadSavedCode failed", res.status);
+      document.getElementById('codeInput').value = starterCode;
+      return;
     }
+
+    const data = await res.json();
+    document.getElementById('codeInput').value = data.code || starterCode;
+    console.log(data.code);
+
+  } catch (e) {
+    document.getElementById('codeInput').value = starterCode;
+    console.log(e);
+  }
+}
 
     function resetCode() {
         if(confirm("Reset to starter code?")) {
@@ -144,6 +152,7 @@
 
         await fetch("/api/save-code", {
             method: "POST",
+            credentials: 'include',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ lessonID: taskID, code: code })
         });
@@ -151,6 +160,7 @@
         try {
             const res = await fetch("/api/run-code", {
                 method: "POST",
+                credentials: 'include',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ lessonID: taskID, code: code })
             });
@@ -162,7 +172,7 @@
             if (result.stderr) html += `<div style="color: #ff6b6b">${result.stderr}</div>`;
             
             if (result.isCorrect) {
-                html += `<div style="margin-top: 10px; color: #4ade80; font-weight: bold;">✨ SUCCESS! Task Completed.</div>`;
+                html += `<div style="margin-top: 10px; color: #4ade80; font-weight: bold;">SUCCESS! Task Completed.</div>`;
                 document.getElementById('taskStatus').innerHTML = '<span style="color: #4ade80"> Solved</span>';
             } else if (result.exitCode !== 0) {
                 html += `<div style="margin-top: 10px; color: #ff6b6b; font-weight: bold;"> Runtime Error (Exit: ${result.exitCode})</div>`;

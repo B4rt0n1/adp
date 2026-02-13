@@ -19,48 +19,68 @@ import (
 )
 
 func (s *Server) handleSaveCode(w http.ResponseWriter, r *http.Request) {
+	u, ok := r.Context().Value(ctxUserKey{}).(userDoc)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+
 	var req saveCodeReq
 	if err := decodeJSON(r, &req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, "Invalid JSON", 400)
+		return
+	}
+
+	lessonOID, err := primitive.ObjectIDFromHex(req.LessonID)
+	if err != nil {
+		http.Error(w, "invalid lessonID", 400)
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	uid, err := primitive.ObjectIDFromHex(req.UserID)
-
-	_, err = s.code_submissions.UpdateOne(
-		ctx,
-		bson.M{"userId": uid},
-		bson.M{
-			"$set": bson.M{
-				"code":      req.Code,
-				"updatedAt": time.Now().UTC(),
-				"lessonId":  req.LessonID,
-			},
-			"$setOnInsert": bson.M{
-				"createdAt": time.Now().UTC(),
-			},
+	filter := bson.M{"userId": u.ID, "lessonId": lessonOID}
+	update := bson.M{
+		"$set": bson.M{
+			"code":      req.Code,
+			"lessonId":  lessonOID,
+			"updatedAt": time.Now().UTC(),
 		},
-		options.Update().SetUpsert(true),
-	)
+		"$setOnInsert": bson.M{"createdAt": time.Now().UTC()},
+	}
+
+	_, err = s.code_submissions.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
 	if err != nil {
-		fmt.Println(req.UserID)
-		fmt.Printf("handleSaveCode UpdateOne error: %v\n", err)
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		http.Error(w, "Server error", 500)
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	fmt.Fprint(w, "Code saved")
 }
 
 func (s *Server) handleGetSavedCode(w http.ResponseWriter, r *http.Request) {
-	u := r.Context().Value(ctxUserKey{}).(userDoc)
-	lessonID := r.URL.Query().Get("lessonId")
-	if lessonID == "" {
+	u, ok := r.Context().Value(ctxUserKey{}).(userDoc)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+
+	lessonIDStr := r.URL.Query().Get("lessonId")
+	if lessonIDStr == "" {
 		http.Error(w, "lessonId required", 400)
+		return
+	}
+
+	lessonID, err := primitive.ObjectIDFromHex(lessonIDStr)
+	if err != nil {
+		http.Error(w, "invalid lessonId", 400)
+		return
+	}
+
+	if u.ID == primitive.NilObjectID {
+		http.Error(w, "No user", 400)
+		fmt.Println("No user")
 		return
 	}
 
@@ -70,9 +90,7 @@ func (s *Server) handleGetSavedCode(w http.ResponseWriter, r *http.Request) {
 		Code string `bson:"code" json:"code"`
 	}
 
-	err := s.code_submissions.FindOne(
-		r.Context(), filter,
-	).Decode(&doc)
+	err = s.code_submissions.FindOne(r.Context(), filter).Decode(&doc)
 
 	if err == mongo.ErrNoDocuments {
 		writeJSON(w, http.StatusOK, map[string]string{"code": ""})
@@ -107,7 +125,7 @@ func (s *Server) handleRunAndCheck(w http.ResponseWriter, r *http.Request) {
 	defer os.RemoveAll(dir)
 	_ = os.WriteFile(filepath.Join(dir, "main.go"), []byte(req.Code), 0644)
 
-	args := []string{"run", "--rm", "-v", dir + ":/work", "-w", "/work", "golang:alpine", "go", "run", "main.go"}
+	args := []string{"run", "--rm", "-v", dir + ":/work", "-w", "/work", "golang:latest", "go", "run", "main.go"}
 	cmd := exec.CommandContext(r.Context(), "docker", args...)
 	var outb, errb bytes.Buffer
 	cmd.Stdout = &outb
